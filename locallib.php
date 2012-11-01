@@ -25,9 +25,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/lib.php');
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/mypdflib.php');
-
 
 /*
  * library class for file submission plugin extending submission plugin
@@ -75,7 +77,7 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         $settings = array();
         $options = array();
-        for($i = 1; $i <= ASSIGNSUBMISSION_PDF_MAXFILES; $i++) {
+        for ($i = 1; $i<=ASSIGNSUBMISSION_PDF_MAXFILES; $i++) {
             $options[$i] = $i;
         }
 
@@ -84,20 +86,24 @@ class assign_submission_pdf extends assign_submission_plugin {
         $mform->disabledIf('assignsubmission_pdf_maxfiles', 'assignsubmission_pdf_enabled', 'eq', 0);
 
         $choices = get_max_upload_sizes($CFG->maxbytes, $COURSE->maxbytes);
-        $choices[0] = get_string('courseuploadlimit') . ' ('.display_size($COURSE->maxbytes).')';
-        $settings[] = array('type' => 'select',
-                            'name' => 'maxsubmissionsizebytes',
-                            'description' => get_string('maximumsubmissionsize', 'assignsubmission_file'),
-                            'options'=>$choices,
-                            'default'=>$defaultmaxsubmissionsizebytes);
+        $choices[0] = get_string('courseuploadlimit').' ('.display_size($COURSE->maxbytes).')';
+        $settings[] = array(
+            'type' => 'select',
+            'name' => 'maxsubmissionsizebytes',
+            'description' => get_string('maximumsubmissionsize', 'assignsubmission_file'),
+            'options' => $choices,
+            'default' => $defaultmaxsubmissionsizebytes
+        );
 
         $mform->addElement('select', 'assignsubmission_pdf_maxsizebytes', get_string('maximumsubmissionsize', 'assignsubmission_file'), $choices);
         $mform->setDefault('assignsubmission_pdf_maxsizebytes', $defaultmaxsubmissionsizebytes);
         $mform->disabledIf('assignsubmission_pdf_maxsizebytes', 'assignsubmission_pdf_enabled', 'eq', 0);
 
         $mform->addElement('filemanager', 'assignsubmission_pdf_coversheet', get_string('coversheet', 'assignsubmission_pdf'), null,
-                           array('subdirs' => 0, 'maxbytes' => $COURSE->maxbytes,
-                                 'maxfiles' => 1, 'accepted_types' => array('*.pdf')));
+                           array(
+                                'subdirs' => 0, 'maxbytes' => $COURSE->maxbytes,
+                                'maxfiles' => 1, 'accepted_types' => array('*.pdf')
+                           ));
 
         $mform->addElement('static', 'assignsubmission_pdf_template', '', 'Select template here');
         $mform->addElement('static', 'assignsubmission_pdf_template_edit', '', 'Edit templates here');
@@ -114,8 +120,10 @@ class assign_submission_pdf extends assign_submission_plugin {
         if ($context) {
             // Not needed if the activty has not yet been created.
             file_prepare_draft_area($draftitemid, $context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET, 0,
-                                    array('subdirs' => 0, 'maxbytes' => $course->maxbytes,
-                                          'maxfiles' => 1, 'accepted_types' => array('*.pdf')));
+                                    array(
+                                         'subdirs' => 0, 'maxbytes' => $course->maxbytes,
+                                         'maxfiles' => 1, 'accepted_types' => array('*.pdf')
+                                    ));
         }
 
         $default_values['assignsubmission_pdf_coversheet'] = $draftitemid;
@@ -127,21 +135,16 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool
      */
     public function save_settings(stdClass $data) {
-        global $DB;
-
         $this->set_config('maxfilesubmissions', $data->assignsubmission_pdf_maxfiles);
         $this->set_config('maxsubmissionsizebytes', $data->assignsubmission_pdf_maxsizebytes);
-
-        // Force 'submissiondrafts' to be on (otherwise this will not work)
-        if (!isset($data->submissiondrafts) || !$data->submissiondrafts) {
-            $DB->set_field('assign', 'submissiondrafts', 1, array('id' => $data->instance));
-        }
 
         $context = $this->assignment->get_context();
         $course = $this->assignment->get_course();
         file_save_draft_area_files($data->assignsubmission_pdf_coversheet, $context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET, 0,
-                                   array('subdirs' => 0, 'maxbytes' => $course->maxbytes,
-                                         'maxfiles' => 1, 'accepted_types' => array('*.pdf')));
+                                   array(
+                                        'subdirs' => 0, 'maxbytes' => $course->maxbytes,
+                                        'maxfiles' => 1, 'accepted_types' => array('*.pdf')
+                                   ));
 
         return true;
     }
@@ -152,11 +155,13 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return array
      */
     private function get_file_options() {
-        $fileoptions = array('subdirs' => 0,
-                             'maxbytes' => $this->get_config('maxsubmissionsizebytes'),
-                             'maxfiles' => $this->get_config('maxfilesubmissions'),
-                             'accepted_types' => array('*.pdf'),
-                             'return_types' => FILE_INTERNAL);
+        $fileoptions = array(
+            'subdirs' => 0,
+            'maxbytes' => $this->get_config('maxsubmissionsizebytes'),
+            'maxfiles' => $this->get_config('maxfilesubmissions'),
+            'accepted_types' => array('*.pdf'),
+            'return_types' => FILE_INTERNAL
+        );
         return $fileoptions;
     }
 
@@ -169,15 +174,14 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
-        if ($this->get_config('maxfilesubmissions') <= 0) {
+        if ($this->get_config('maxfilesubmissions')<=0) {
             return false;
         }
 
         $fileoptions = $this->get_file_options();
         $submissionid = $submission ? $submission->id : 0;
 
-
-        $data = file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
+        file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
         $mform->addElement('filemanager', 'pdfs_filemanager', '', null, $fileoptions);
 
         $mform->addElement('static', 'pdf_test', 'Hello', 'Fill in some details before submitting stuff (if there are templates)');
@@ -214,13 +218,14 @@ class assign_submission_pdf extends assign_submission_plugin {
         // Pre-process all files to convert to useful PDF format
         $fileoptions = $this->get_file_options();
 
-        $data = file_postupdate_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
+        file_postupdate_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
 
         $filesubmission = $this->get_file_submission($submission->id);
 
         //plagiarism code event trigger when files are uploaded
 
         $fs = get_file_storage();
+        /** @var $files stored_file[] */
         $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "id", false);
         // Check all files are PDF v1.4 or less
         foreach ($files as $key => $file) {
@@ -244,13 +249,12 @@ class assign_submission_pdf extends assign_submission_plugin {
         $eventdata->itemid = $submission->id;
         $eventdata->courseid = $this->assignment->get_course()->id;
         $eventdata->userid = $USER->id;
-        if ($count > 1) {
+        if ($count>1) {
             $eventdata->files = $files; // This is depreceated - please use pathnamehashes instead!
         }
         $eventdata->file = $files; // This is depreceated - please use pathnamehashes instead!
         $eventdata->pathnamehashes = array_keys($files);
         events_trigger('assessable_file_uploaded', $eventdata);
-
 
         if ($filesubmission) {
             $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
@@ -260,7 +264,7 @@ class assign_submission_pdf extends assign_submission_plugin {
             $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
-            return $DB->insert_record('assignsubmission_pdf', $filesubmission) > 0;
+            return $DB->insert_record('assignsubmission_pdf', $filesubmission)>0;
         }
     }
 
@@ -270,7 +274,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool|string 'true' if all data supplied, message if some data still needed
      */
     public function precheck_submission() {
-        // TODO
+        // TODO check coversheet data has been supplied
         return true;
     }
 
@@ -279,7 +283,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return void
      */
     public function submit_for_grading() {
-        // TODO
+        // TODO combine all the PDFs together, including the coversheet
     }
 
     /**
@@ -292,6 +296,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         $result = array();
         $fs = get_file_storage();
 
+        /** @var $files stored_file[] */
         $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "timemodified", false);
 
         foreach ($files as $file) {
@@ -303,6 +308,7 @@ class assign_submission_pdf extends assign_submission_plugin {
     /**
      * Display the list of files  in the submission status table
      * @param stdClass $submission
+     * @param bool $showviewlink
      * @return string
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
@@ -318,7 +324,7 @@ class assign_submission_pdf extends assign_submission_plugin {
             unset($SESSION->assignsubmission_pdf_invalid);
         }
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
-        $showviewlink = $count > ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES;
+        $showviewlink = $count>ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES;
         if ($showviewlink) {
             $output .= get_string('countfiles', 'assignsubmission_pdf', $count);
         } else {
@@ -338,8 +344,6 @@ class assign_submission_pdf extends assign_submission_plugin {
         return $this->assignment->render_area_files('assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
     }
 
-
-
     /**
      * Return true if this plugin can upgrade an old Moodle 2.2 assignment of this type
      * and version.
@@ -349,6 +353,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool True if upgrade is possible
      */
     public function can_upgrade($type, $version) {
+        // TODO return true for uploadpdf assignments
         /*
         if ($type == 'uploadpdf' && $version >= ?? 2011112900) {
             return true;
@@ -356,17 +361,17 @@ class assign_submission_pdf extends assign_submission_plugin {
         return false;
     }
 
-
     /**
      * Upgrade the settings from the old assignment
      * to the new plugin based one
      *
      * @param context $oldcontext - the old assignment context
      * @param stdClass $oldassignment - the old assignment data record
-     * @param string log record log events here
+     * @param string $log record log events here
      * @return bool Was it a success? (false will trigger rollback)
      */
     public function upgrade_settings(context $oldcontext, stdClass $oldassignment, & $log) {
+        // TODO upgrade uploadpdf settings
         /*
         if ($oldassignment->assignmenttype == 'uploadsingle') {
             $this->set_config('maxfilesubmissions', 1);
@@ -393,6 +398,8 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool true or false - false will trigger a rollback
      */
     public function upgrade(context $oldcontext, stdClass $oldassignment, stdClass $oldsubmission, stdClass $submission, & $log) {
+        // TODO upgrade uploadpdf assignments
+
         /*
         global $DB;
 
@@ -455,7 +462,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         // format the info for each submission plugin add_to_log
         $filecount = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
         $fileloginfo = '';
-        $fileloginfo .= ' the number of file(s) : ' . $filecount . " file(s).<br>";
+        $fileloginfo .= ' the number of file(s) : '.$filecount." file(s).<br>";
 
         return $fileloginfo;
     }

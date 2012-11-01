@@ -17,11 +17,12 @@
 /**
  * Capability definitions for this module.
  *
- * @package   mod_assign
- * @subpackage   submission_pdf
+ * @package   assignsubmission_pdf
  * @copyright 2012 Davo Smith
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 

@@ -18,13 +18,14 @@
 /**
  * Version information
  *
- * @package    mod_assign
  * @package    assignsubmission_pdf
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright  2012 Davo Smith
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $plugin->version   = 2012031701;
 $plugin->requires  = 2011110200;
 $plugin->component = 'assignsubmission_pdf';
+$plugin->maturity  = MATURITY_ALPHA;
+$plugin->cron      = 0;
 

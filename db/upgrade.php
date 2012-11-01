@@ -18,8 +18,7 @@
 /**
  * Upgrade code for install
  *
- * @package   mod_assign
- * @subpackage   submission_pdf
+ * @package   assignsubmission_pdf
  * @copyright 2012 Davo Smith
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,6 +28,8 @@
  * @param int $oldversion
  * @return bool
  */
+defined('MOODLE_INTERNAL') || die();
+
 function xmldb_assignsubmission_pdf_upgrade($oldversion) {
     return true;
 }

@@ -26,25 +26,39 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
 require_once($CFG->libdir.'/tcpdf/tcpdf.php');
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/fpdi/fpdi.php');
 
 class AssignPDFLib extends FPDI {
 
+    /** @var int the number of the current page in the PDF being processed */
     protected $currentpage = 0;
+    /** @var int the total number of pages in the PDF being processed */
     protected $pagecount = 0;
+    /** @var float used to scale the pixel position of annotations (in the database) to the position in the final PDF */
     protected $scale = 0.0;
+    /** @var string the path in which to store generated page images */
     protected $imagefolder = null;
+    /** @var string the path to the PDF currently being processed */
     protected $filename = null;
 
-    public function combine_pdfs($pdf_list, $output, $coversheet=null, $comments=null) {
+    /**
+     * Combine the given PDF files into a single PDF. Optionally add a coversheet and coversheet fields.
+     * @param $pdflist string[] the filenames of the files to combine
+     * @param $output string the filename to write to
+     * @param $coversheet string optional the coversheet to include
+     * @param $fields stdClass[] optional the fields to write onto the coversheet
+     * @return int the number of pages in the combined PDF
+     */
+    public function combine_pdfs($pdflist, $output, $coversheet = null, $fields = null) {
 
         $this->setPageUnit('pt');
         $this->setPrintHeader(false);
         $this->setPrintFooter(false);
         $this->scale = 72.0 / 100.0;
-        $this->SetFont('helvetica','', 12.0 * $this->scale);
-        $this->SetTextColor(0,0,0);
+        $this->SetFont('helvetica', '', 12.0 * $this->scale);
+        $this->SetTextColor(0, 0, 0);
 
         $totalpagecount = 0;
         if ($coversheet) {
@@ -55,28 +69,29 @@ class AssignPDFLib extends FPDI {
             $this->AddPage('P', array($size['w'], $size['h']));
             $this->setPageOrientation('P', false, 0);
             $this->useTemplate($template);
-            if ($comments) {
-                foreach ($comments as $c) {
+            if ($fields) {
+                foreach ($fields as $c) {
                     $x = $c->xpos * $this->scale;
                     $y = $c->ypos * $this->scale;
                     $width = 0;
 
+                    $text = '';
                     if ($c->type == 'text') {
                         $width = $c->width * $this->scale;
                         $text = $c->data;
-                    } elseif ($c->type == 'shorttext') {
+                    } else if ($c->type == 'shorttext') {
                         $text = $c->data;
-                    } elseif ($c->type == 'date') {
+                    } else if ($c->type == 'date') {
                         $text = date($c->setting);
                     }
 
-                    $text = str_replace('&lt;','<', $text);
-                    $text = str_replace('&gt;','>', $text);
+                    $text = str_replace('&lt;', '<', $text);
+                    $text = str_replace('&gt;', '>', $text);
                     $this->MultiCell($width, 1.0, $text, 0, 'L', 0, 1, $x, $y); /* width, height, text, border, justify, fill, ln, x, y */
                 }
             }
 
-            for ($i=2; $i<=$pagecount; $i++) {
+            for ($i = 2; $i<=$pagecount; $i++) {
                 $template = $this->ImportPage($i);
                 $size = $this->getTemplateSize($template);
                 $this->AddPage('P', array($size['w'], $size['h']));
@@ -84,10 +99,10 @@ class AssignPDFLib extends FPDI {
                 $this->useTemplate($template);
             }
         }
-        foreach ($pdf_list as $key => $file) {
+        foreach ($pdflist as $file) {
             $pagecount = $this->setSourceFile($file);
             $totalpagecount += $pagecount;
-            for ($i=1; $i<=$pagecount; $i++) {
+            for ($i = 1; $i<=$pagecount; $i++) {
                 $template = $this->ImportPage($i);
                 $size = $this->getTemplateSize($template);
                 $this->AddPage('P', array($size['w'], $size['h']));
@@ -101,17 +116,36 @@ class AssignPDFLib extends FPDI {
         return $totalpagecount;
     }
 
-    public function current_page() { return $this->currentpage; }
-    public function page_count() { return $this->pagecount; }
+    /**
+     * The number of the current page in the PDF being processed
+     * @return int
+     */
+    public function current_page() {
+        return $this->currentpage;
+    }
 
+    /**
+     * The total number of pages in the PDF being processed
+     * @return int
+     */
+    public function page_count() {
+        return $this->pagecount;
+    }
+
+    /**
+     * Load the specified PDF and set the initial output configuration
+     * Used when processing comments and outputting a new PDF
+     * @param $filename string the path to the PDF to load
+     * @return int the number of pages in the PDF
+     */
     public function load_pdf($filename) {
         $this->setPageUnit('pt');
         $this->scale = 72.0 / 100.0;
-        $this->SetFont('helvetica','', 12.0 * $this->scale);
+        $this->SetFont('helvetica', '', 12.0 * $this->scale);
         $this->SetFillColor(255, 255, 176);
-        $this->SetDrawColor(0,0,0);
+        $this->SetDrawColor(0, 0, 0);
         $this->SetLineWidth(1.0 * $this->scale);
-        $this->SetTextColor(0,0,0);
+        $this->SetTextColor(0, 0, 0);
         $this->setPrintHeader(false);
         $this->setPrintFooter(false);
         $this->pagecount = $this->setSourceFile($filename);
@@ -119,7 +153,15 @@ class AssignPDFLib extends FPDI {
         return $this->pagecount;
     }
 
-    public function set_pdf($filename, $pagecount=0) {
+    /**
+     * Sets the name of the PDF to process, but only loads the file if the
+     * pagecount is zero (in order to count the number of pages)
+     * Used when generating page images (but not a new PDF)
+     * @param $filename string the path to the PDF to process
+     * @param $pagecount int optional the number of pages in the PDF, if known
+     * @return int the number of pages in the PDF
+     */
+    public function set_pdf($filename, $pagecount = 0) {
         if ($pagecount == 0) {
             return $this->load_pdf($filename);
         } else {
@@ -130,13 +172,14 @@ class AssignPDFLib extends FPDI {
     }
 
     /**
-     * Copy next page from source file and set as current page
+     * Copy the next page from the source file and set it as the current page
+     * @return bool true if successful
      */
     public function copy_page() {
         if (!$this->filename) {
             return false;
         }
-        if ($this->currentpage >= $this->pagecount) {
+        if ($this->currentpage>=$this->pagecount) {
             return false;
         }
         $this->currentpage++;
@@ -149,7 +192,7 @@ class AssignPDFLib extends FPDI {
     }
 
     /**
-     * Copy all the rest of the pages in the file
+     * Copy all the remaining pages in the file
      */
     public function copy_remaining_pages() {
         while ($this->copy_page());
@@ -157,12 +200,18 @@ class AssignPDFLib extends FPDI {
 
     /**
      * Add a comment to the current page
+     * @param $text string the text of the comment
+     * @param $x int the x-coordinate of the comment (in pixels)
+     * @param $y int the y-coordinate of the comment (in pixels)
+     * @param $width int the width of the comment (in pixels)
+     * @param $colour string optional the background colour of the comment (red, yellow, green, blue, white, clear)
+     * @return bool true if successful (always)
      */
-    public function add_comment($text, $x, $y, $width, $colour='yellow') {
+    public function add_comment($text, $x, $y, $width, $colour = 'yellow') {
         if (!$this->filename) {
             return false;
         }
-        switch($colour) {
+        switch ($colour) {
         case 'red':
             $this->SetFillColor(255, 176, 176);
             break;
@@ -175,7 +224,7 @@ class AssignPDFLib extends FPDI {
         case 'white':
             $this->SetFillColor(255, 255, 255);
             break;
-        default:                /* Yellow */
+        default: /* Yellow */
             $this->SetFillColor(255, 255, 176);
             break;
         }
@@ -183,15 +232,19 @@ class AssignPDFLib extends FPDI {
         $x *= $this->scale;
         $y *= $this->scale;
         $width *= $this->scale;
-        $text = str_replace('&lt;','<', $text);
-        $text = str_replace('&gt;','>', $text);
+        $text = str_replace('&lt;', '<', $text);
+        $text = str_replace('&gt;', '>', $text);
+        // Draw the text with a border, but no background colour (using a background colour would cause the fill to
+        // appear behind any existing content on the page, hence the extra filled rectangle drawn below).
         $this->MultiCell($width, 1.0, $text, 0, 'L', 0, 1, $x, $y); /* width, height, text, border, justify, fill, ln, x, y */
         if ($colour != 'clear') {
             $newy = $this->GetY();
-            if (($newy - $y) < (24.0 * $this->scale)) {  /* Single line comment (ie less than 2*text height) */
+            if (($newy - $y)<(24.0 * $this->scale)) { /* Single line comment (ie less than 2*text height) */
                 $width = $this->GetStringWidth($text) + 4.0; /* Resize box to the length of the text + 2 line widths */
             }
-            $this->Rect($x, $y, $width, $newy-$y, 'DF');
+            // Now we know the final size of the comment, draw a rectangle with the background colour
+            $this->Rect($x, $y, $width, $newy - $y, 'DF');
+            // Re-draw the text over the top of the background rectangle
             $this->MultiCell($width, 1.0, $text, 0, 'L', 0, 1, $x, $y); /* width, height, text, border, justify, fill, ln, x, y */
         }
         return true;
@@ -199,13 +252,22 @@ class AssignPDFLib extends FPDI {
 
     /**
      * Add an annotation to the current page
+     * @param $sx int starting x-coordinate (in pixels)
+     * @param $sy int starting y-coordinate (in pixels)
+     * @param $ex int ending x-coordinate (in pixels)
+     * @param $ey int ending y-coordinate (in pixels)
+     * @param $colour string optional the colour of the annotation (red, yellow, green, blue, white, black)
+     * @param $type string optional the type of annotation (line, oval, rectangle, highlight, freehand, stamp)
+     * @param $path mixed int[]|string optional for 'freehand' annotations this is an array of x and y coordinates for
+     *              the line, for 'stamp' annotations it is the name of the stamp file (without the path)
+     * @return bool true if successful (always)
      */
-    public function add_annotation($sx, $sy, $ex, $ey, $colour='red', $type='line', $path=null) {
+    public function add_annotation($sx, $sy, $ex, $ey, $colour = 'red', $type = 'line', $path = null) {
         global $CFG;
         if (!$this->filename) {
             return false;
         }
-        switch($colour) {
+        switch ($colour) {
         case 'yellow':
             $this->SetDrawColor(255, 255, 0);
             break;
@@ -221,7 +283,7 @@ class AssignPDFLib extends FPDI {
         case 'black':
             $this->SetDrawColor(0, 0, 0);
             break;
-        default:                /* Red */
+        default: /* Red */
             $colour = 'red';
             $this->SetDrawColor(255, 0, 0);
             break;
@@ -233,10 +295,10 @@ class AssignPDFLib extends FPDI {
         $ey *= $this->scale;
 
         $this->SetLineWidth(3.0 * $this->scale);
-        switch($type) {
+        switch ($type) {
         case 'oval':
-            $rx = abs($sx - $ex)/2;
-            $ry = abs($sy - $ey)/2;
+            $rx = abs($sx - $ex) / 2;
+            $ry = abs($sy - $ey) / 2;
             $sx = min($sx, $ex) + $rx;
             $sy = min($sy, $ey) + $ry;
             $this->Ellipse($sx, $sy, $rx, $ry);
@@ -253,7 +315,7 @@ class AssignPDFLib extends FPDI {
             $h = 12.0 * $this->scale;
             $sx = min($sx, $ex);
             $sy = min($sy, $ey) - $h * 0.5;
-            $imgfile = $CFG->dirroot.'/mod/assignment/type/uploadpdf/pix/trans'.$colour.'.png';
+            $imgfile = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/trans'.$colour.'.png'; // TODO create this path
             $this->Image($imgfile, $sx, $sy, $w, $h);
             break;
         case 'freehand':
@@ -279,18 +341,22 @@ class AssignPDFLib extends FPDI {
             $this->Line($sx, $sy, $ex, $ey);
             break;
         }
-        $this->SetDrawColor(0,0,0);
+        $this->SetDrawColor(0, 0, 0);
         $this->SetLineWidth(1.0 * $this->scale);
 
         return true;
     }
 
+    /**
+     * Get a list of the available stamp images - the PNG files found within the mod/assign/feedback/pdf/pix/stamps folder
+     * @return string[] 'stampname' => 'filepath'
+     */
     public static function get_stamps() {
         global $CFG;
         static $stamplist = null;
         if ($stamplist == null) {
             $stamplist = array();
-            $basedir = $CFG->dirroot.'/mod/assign/submission/pdf/pix/stamps';
+            $basedir = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/stamps'; // TODO create this path
             if ($dir = opendir($basedir)) {
                 while (false !== ($file = readdir($dir))) {
                     $pathinfo = pathinfo($file);
@@ -303,71 +369,90 @@ class AssignPDFLib extends FPDI {
         return $stamplist;
     }
 
-    public static function get_stamp_file($path) {
-        if (!$path) {
+    /**
+     * Get the location of the image file for a given stamp (or false, if it does not exist)
+     * @param $stampname
+     * @return mixed string|false the path to the image file for the stamp
+     */
+    public static function get_stamp_file($stampname) {
+        if (!$stampname) {
             return false;
         }
         $stamps = self::get_stamps();
-        if (!array_key_exists($path, $stamps)) {
+        if (!array_key_exists($stampname, $stamps)) {
             return false;
         }
-        return $stamps[$path];
+        return $stamps[$stampname];
     }
 
+    /**
+     * Save the completed PDF to the given file
+     * @param $filename string the filename for the PDF (including the full path)
+     */
     public function save_pdf($filename) {
         $this->Output($filename, 'F');
     }
 
+    /**
+     * Set the path to the folder in which to generate page image files
+     * @param $folder string
+     */
     public function set_image_folder($folder) {
         $this->imagefolder = $folder;
     }
 
+    /**
+     * Generate an image of the specified page in the PDF
+     * @param $pageno int the page to generate the image of
+     * @throws moodle_exception
+     * @throws coding_exception
+     * @return string the filename of the generated image
+     */
     public function get_image($pageno) {
-        global $CFG;
-
         if (!$this->filename) {
-            echo 'no filename';
-            return false;
+            throw new coding_exception('Attempting to generate a page image without first setting the PDF filename');
         }
 
         if (!$this->imagefolder) {
-            echo 'no image folder';
-            return false;
+            throw new coding_exception('Attempting to generate a page image without first specifying the image output folder');
         }
 
         if (!is_dir($this->imagefolder)) {
-            echo 'bad folder: '.$this->imagefolder;
-            return false;
+            throw new coding_exception('The specified image output folder is not a valid folder');
         }
 
         $imagefile = $this->imagefolder.'/image_page'.$pageno.'.png';
         $generate = true;
         if (file_exists($imagefile)) {
-            if (filemtime($imagefile) > filemtime($this->filename)) {
+            if (filemtime($imagefile)>filemtime($this->filename)) {
                 // Make sure the image is newer than the PDF file
                 $generate = false;
             }
         }
 
         if ($generate) {
+            // Use ghostscript to generate an image of the specified page
             $gsexec = get_config('assignsubmission_pdf_gspath');
             $imageres = 100;
             $filename = $this->filename;
             $command = "$gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pageno -dLastPage=$pageno -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=\"$imagefile\" \"$filename\" 2>&1";
             $result = exec($command);
             if (!file_exists($imagefile)) {
-                echo htmlspecialchars($command).'<br/>';
-                echo htmlspecialchars($result).'<br/>';
-                return false;
+                $fullerror = htmlspecialchars($command).'<br/>';
+                $fullerror .= htmlspecialchars($result).'<br/>';
+                throw new moodle_exception('errorgenerateimage', 'assignfeedback_pdf', '', $fullerror); // TODO create this string
             }
         }
 
         return 'image_page'.$pageno.'.png';
     }
 
-    // Check to see if PDF is version 1.4 (or below); if not: use ghostscript to convert it
-    // Return - false for invalid PDF, true for no change needed or if file has been updated
-    static function ensure_pdf_compatible($file) {
+    /**
+     * Check to see if PDF is version 1.4 (or below); if not: use ghostscript to convert it
+     * @param stored_file $file
+     * @return bool false if the PDF is invalid, true if the PDF is valid (or has been converted)
+     */
+    static function ensure_pdf_compatible(stored_file $file) {
         global $CFG;
 
         $fp = $file->get_content_file_handle();
@@ -383,13 +468,14 @@ class AssignPDFLib extends FPDI {
         if ($major == 0 || $minor == 0) {
             return false; // Not a valid PDF version number
         }
-        if ($major = 1 && $minor <= 4) {
+        if ($major = 1 && $minor<=4) {
             return true; // We can handle this version - nothing else to do
         }
 
         $temparea = $CFG->dataroot.'/temp/uploadpdf';
-        $tempsrc = $temparea.'/src.pdf';
-        $tempdst = $temparea.'/dst.pdf';
+        $hash = $file->get_contenthash(); // Use the contenthash to make sure the temp files have unique names.
+        $tempsrc = $temparea."/src-$hash.pdf";
+        $tempdst = $temparea."/dst-$hash.pdf";
 
         if (!file_exists($temparea)) {
             if (!mkdir($temparea, 0777, true)) {
@@ -401,17 +487,19 @@ class AssignPDFLib extends FPDI {
 
         $gsexec = get_config('assignsubmission_pdf_gspath');
         $command = "$gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=\"$tempdst\" \"$tempsrc\" 2>&1";
-        $result = exec($command);
+        exec($command);
         if (!file_exists($tempdst)) {
             return false; // Something has gone wrong in the conversion
         }
 
-        $fileinfo = array('contextid' => $file->get_contextid(),
-                          'component' => $file->get_component(),
-                          'filearea' => $file->get_filearea(),
-                          'itemid' => $file->get_itemid(),
-                          'filename' => $file->get_filename(),
-                          'filepath' => $file->get_filepath());
+        $fileinfo = array(
+            'contextid' => $file->get_contextid(),
+            'component' => $file->get_component(),
+            'filearea' => $file->get_filearea(),
+            'itemid' => $file->get_itemid(),
+            'filename' => $file->get_filename(),
+            'filepath' => $file->get_filepath()
+        );
         $file->delete(); // Delete the original file
         $fs = get_file_storage();
         $fs->create_file_from_pathname($fileinfo, $tempdst); // Create replacement file

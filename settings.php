@@ -18,14 +18,14 @@
 /**
  * This file defines the admin settings for this plugin
  *
- * @package   mod_assign
- * @subpackage   assignsubmission_pdf
+ * @package   assignsubmission_pdf
  * @copyright 2012 Davo Smith
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/lib.php');
 
 if (isset($CFG->maxbytes)) {
