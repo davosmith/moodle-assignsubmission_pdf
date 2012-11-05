@@ -1,3 +1,9 @@
+This is a very incomplete conversion of my Moodle 1.9-2.2 UploadPDF plugin to work with Moodle 2.3.
+
+Do not install it on a production site - it is more than broken, it is totally incomplete and not yet useful.
+
+-----------------------------
+
 This plugin for the assignment module allows a teacher to annotate and
 return PDF files that have been submitted by students.
 
@@ -43,6 +49,8 @@ Note: this plugin needs PHP 5.2.0 (or above) for the JSON library.
   NOT 'c:\Program Files\gs' (note you only need the files
   'gswin32c.exe' and the dll file from the 'bin' folder, all other
   files are unnecessary for this to work).
+
+!! THIS IS OUT OF DATE - TO BE UPDATED WHEN I FINISH THE PLUGIN !!
 
 2. Unzip the Uploadpdf plugin files to a folder on your local machine
 
