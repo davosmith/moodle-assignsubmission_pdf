@@ -280,10 +280,97 @@ class assign_submission_pdf extends assign_submission_plugin {
 
     /**
      * Combine the PDFs together ready for marking
+     * @param stdClass $submission optional details of the submission to process
      * @return void
      */
-    public function submit_for_grading() {
-        // TODO combine all the PDFs together, including the coversheet
+    public function submit_for_grading(stdClass $submission = null) {
+        global $DB, $USER;
+        $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
+                                                                'userid' => $USER->id));
+
+        $this->create_submission_pdf($submission);
+    }
+
+    protected function get_temp_folder($submissionid) {
+        global $CFG, $USER;
+
+        $tempfolder = $CFG->dataroot.'/temp/uploadpdf/';
+        $tempfolder .= sha1("{$submissionid}_{$USER->id}_".time());
+        return $tempfolder;
+    }
+
+    protected function create_submission_pdf(stdClass $submission) {
+        $fs = get_file_storage();
+
+        $context = $this->assignment->get_context();
+        $coversheet = null;
+        $templateitems = null;
+
+        // Create a the required temporary folders.
+        $temparea = $this->get_temp_folder($submission->id);
+        $tempdestarea = $temparea.'sub';
+        $destfile = $tempdestarea.'/'.ASSIGNSUBMISSION_PDF_FILENAME;
+        if (!file_exists($temparea) || !file_exists($tempdestarea)) {
+            if (!mkdir($temparea, 0777, true) || !mkdir($tempdestarea, 0777, true)) {
+                $errdata = (object)array('temparea' => $temparea, 'tempdestarea' => $tempdestarea);
+                throw new moodle_exception('errortempfolder', 'assignsubmission_pdf', '', null, $errdata);
+            }
+        }
+
+        // Get the coversheet details and copy the file to the temporary folder
+        $coversheetfiles = $fs->get_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET,
+                                               false, '', false);
+        if ($coversheetfiles) {
+            $coversheetfile = reset($coversheetfiles); // Only ever one coversheet file.
+            // TODO - set $templateitems up with the data the user has filled in
+            $coversheet = $tempdestarea.'/coversheet.pdf';
+            if (!$coversheetfile->copy_content_to_($coversheet)) {
+                $errdata = (object)array('coversheet' => $coversheet);
+                throw new moodle_exception('errorcoversheet', 'assignsubmission_pdf', '', null, $errdata);
+            }
+        }
+
+        // Copy all the PDFs to the temporary folder.
+        /** @var $files stored_file[] */
+        $files = $fs->get_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT,
+                                     $submission->id, "sortorder, id", false);
+        $combinefiles = array();
+        foreach ($files as $file) {
+            $destpath = $temparea.'/'.$file->get_contenthash();
+            if (!$file->copy_content_to($destpath)) {
+                throw new moodle_exception('errorcopyfile', 'assignsubmission_pdf', '', $file->get_filename());
+            }
+            $combinefiles[] = $destpath;
+        }
+
+        // Combine all the submitted files and the coversheet.
+        $mypdf = new AssignPDFLib();
+        if (!$mypdf->combine_pdfs($combinefiles, $destfile, $coversheet, $templateitems)) {
+            return; // No pages found in the submitted files - this shouldn't happen.
+        }
+
+        // Copy the combined file into the submission area.
+        $fs->delete_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_FINAL, $submission->id);
+        $fileinfo = array(
+            'contextid' => $context->id,
+            'component' => 'assignsubmission_pdf',
+            'filearea' => ASSIGNSUBMISSION_PDF_FA_FINAL,
+            'itemid' => $submission->id,
+            'filename' => ASSIGNSUBMISSION_PDF_FILENAME,
+            'filepath' => '/'
+        );
+        $fs->create_file_from_pathname($fileinfo, $destfile);
+
+        // Clean up all the temporary files.
+        unlink($destfile);
+        if ($coversheet) {
+            unlink($coversheet);
+        }
+        foreach ($combinefiles as $combinefile) {
+            unlink($combinefile);
+        }
+        @rmdir($tempdestarea);
+        @rmdir($temparea);
     }
 
     /**
@@ -312,7 +399,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return string
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
-        global $SESSION;
+        global $SESSION, $DB;
 
         $output = '';
         if (isset($SESSION->assignsubmission_pdf_invalid)) {
@@ -323,12 +410,35 @@ class assign_submission_pdf extends assign_submission_plugin {
             $output .= html_writer::tag('div', $invalidfiles, array('class' => 'assignsubmission_pdf_invalid'));
             unset($SESSION->assignsubmission_pdf_invalid);
         }
-        $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
-        $showviewlink = $count>ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES;
-        if ($showviewlink) {
-            $output .= get_string('countfiles', 'assignsubmission_pdf', $count);
+
+        if (!isset($submission->status)) {
+            // For some silly reason, the status is not included in the details when drawing the grading table - so
+            // I need to do an extra DB query just to retrieve that information.
+            static $submissionstatus = null;
+            if (is_null($submissionstatus)) {
+                $submissionstatus = $DB->get_records_menu('assign_submission', array('assignment' => $submission->assignment),
+                                                          '', 'id, status');
+            }
+            if (isset($submissionstatus[$submission->id])) {
+                $submission->status = $submissionstatus[$submission->id];
+            } else {
+                $submission->status = ASSIGN_SUBMISSION_STATUS_DRAFT;
+            }
+        }
+
+        if ($submission->status == ASSIGN_SUBMISSION_STATUS_DRAFT) {
+            $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
+            $showviewlink = $count>ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES;
+            if ($showviewlink) {
+                $output .= get_string('countfiles', 'assignsubmission_pdf', $count);
+            } else {
+                $output .= $this->assignment->render_area_files('assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
+            }
         } else {
-            $output .= $this->assignment->render_area_files('assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
+            $context = $this->assignment->get_context();
+            $url = moodle_url::make_pluginfile_url($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_FINAL,
+                                                   $submission->id, '/', ASSIGNSUBMISSION_PDF_FILENAME, true);
+            $output .= html_writer::link($url, get_string('finalsubmission', 'assignsubmission_pdf'));
         }
 
         return $output;

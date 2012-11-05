@@ -46,12 +46,12 @@ class AssignPDFLib extends FPDI {
     /**
      * Combine the given PDF files into a single PDF. Optionally add a coversheet and coversheet fields.
      * @param $pdflist string[] the filenames of the files to combine
-     * @param $output string the filename to write to
+     * @param $outfilename string the filename to write to
      * @param $coversheet string optional the coversheet to include
      * @param $fields stdClass[] optional the fields to write onto the coversheet
      * @return int the number of pages in the combined PDF
      */
-    public function combine_pdfs($pdflist, $output, $coversheet = null, $fields = null) {
+    public function combine_pdfs($pdflist, $outfilename, $coversheet = null, $fields = null) {
 
         $this->setPageUnit('pt');
         $this->setPrintHeader(false);
@@ -111,7 +111,7 @@ class AssignPDFLib extends FPDI {
             }
         }
 
-        $this->save_pdf($output);
+        $this->save_pdf($outfilename);
 
         return $totalpagecount;
     }

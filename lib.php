@@ -27,6 +27,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
+require_once($CFG->dirroot.'/mod/assign/locallib.php');
+
 /**
  * General definitions
  */
@@ -43,3 +46,62 @@ define('ASSIGNSUBMISSION_PDF_FA_FINAL', 'submission_pdf_final'); // Generated co
 define('ASSIGN_PDF_FILEAREA_IMAGE', 'submission_pdf_image'); // Images generated from each page of the PDF
 define('ASSIGN_PDF_FILEAREA_RESPONSE', 'submission_pdf_response'); // Response generated once annotation is complete
 */
+
+define('ASSIGNSUBMISSION_PDF_FILENAME', 'submission.pdf');
+
+function assignsubmission_pdf_pluginfile($course, $cm, context $context, $filearea, $args, $forcedownload, $opts) {
+    global $DB, $USER;
+
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    $submissionid = array_shift($args);
+    $submission = $DB->get_record('assign_submission', array('id' => $submissionid));
+
+    if ($submission->assignment != $cm->instance) {
+        return false; // Submission does not belong to this assignment.
+    }
+
+    if ($USER->id == $submission->userid) {
+        // Own submission - check permission to submit.
+        if (!has_capability('mod/assign:submit', $context)) {
+            return false;
+        }
+    } else {
+        // Another user's submission - check permission to grade.
+        if (!has_capability('mod/assign:grade', $context)) {
+            return false;
+        }
+    }
+
+    $filename = array_pop($args);
+    $filepath = '/';
+    if ($filearea == ASSIGNSUBMISSION_PDF_FA_DRAFT) {
+        if ($submission->status == ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+            return false; // Already submitted for marking.
+        }
+        if (empty($args)) {
+            $filepath = '/';
+        } else {
+            $filepath = '/'.implode('/', $args).'/';
+        }
+    } else if ($filearea == ASSIGNSUBMISSION_PDF_FA_FINAL) {
+        if ($filename != ASSIGNSUBMISSION_PDF_FILENAME || !empty($args)) {
+            return false; // Check filename and path (empty)
+        }
+        if ($submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+            return false; // Not submitted for marking.
+        }
+    } else {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'assignsubmission_pdf', $filearea, $submission->id, $filepath, $filename);
+    if ($file) {
+        send_stored_file($file, 86400, 0, $forcedownload);
+    }
+
+    return false;
+}
