@@ -274,7 +274,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool|string 'true' if all data supplied, message if some data still needed
      */
     public function precheck_submission() {
-        // TODO check coversheet data has been supplied
+        // TODO davo - check coversheet data has been supplied
         return true;
     }
 
@@ -463,7 +463,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool True if upgrade is possible
      */
     public function can_upgrade($type, $version) {
-        // TODO return true for uploadpdf assignments
+        // TODO davo - return true for uploadpdf assignments
         /*
         if ($type == 'uploadpdf' && $version >= ?? 2011112900) {
             return true;
@@ -481,7 +481,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool Was it a success? (false will trigger rollback)
      */
     public function upgrade_settings(context $oldcontext, stdClass $oldassignment, & $log) {
-        // TODO upgrade uploadpdf settings
+        // TODO davo - upgrade uploadpdf settings
         /*
         if ($oldassignment->assignmenttype == 'uploadsingle') {
             $this->set_config('maxfilesubmissions', 1);
@@ -508,7 +508,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool true or false - false will trigger a rollback
      */
     public function upgrade(context $oldcontext, stdClass $oldassignment, stdClass $oldsubmission, stdClass $submission, & $log) {
-        // TODO upgrade uploadpdf assignments
+        // TODO davo - upgrade uploadpdf assignments
 
         /*
         global $DB;
@@ -557,7 +557,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         // will throw exception on failure
         $DB->delete_records('assignsubmission_pdf', array('assignment' => $this->assignment->get_instance()->id));
 
-        // TODO - lots of cleanup needed here
+        // TODO davo - lots of cleanup needed here
 
         return true;
     }
@@ -591,9 +591,9 @@ class assign_submission_pdf extends assign_submission_plugin {
     public function get_file_areas() {
         $name = $this->get_name();
         return array(
-            ASSIGNSUBMISSION_PDF_FA_COVERSHEET => $name,
-            ASSIGNSUBMISSION_PDF_FA_DRAFT => $name,
-            ASSIGNSUBMISSION_PDF_FA_FINAL => $name
+            ASSIGNSUBMISSION_PDF_FA_COVERSHEET => get_string('coversheetfor', 'assignsubmission_pdf', $name),
+            ASSIGNSUBMISSION_PDF_FA_DRAFT => get_string('draftfor', 'assignsubmission_pdf', $name),
+            ASSIGNSUBMISSION_PDF_FA_FINAL => get_string('finalfor', 'assignsubmission_pdf', $name)
         );
     }
 }

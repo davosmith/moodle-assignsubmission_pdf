@@ -42,10 +42,6 @@ define('ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES', 5);
 define('ASSIGNSUBMISSION_PDF_FA_COVERSHEET', 'submission_pdf_coversheet'); // Coversheet to attach
 define('ASSIGNSUBMISSION_PDF_FA_DRAFT', 'submission_pdf_draft'); // Files that have been uploaded but not submitted for marking
 define('ASSIGNSUBMISSION_PDF_FA_FINAL', 'submission_pdf_final'); // Generated combined PDF (with coversheet)
-/*
-define('ASSIGN_PDF_FILEAREA_IMAGE', 'submission_pdf_image'); // Images generated from each page of the PDF
-define('ASSIGN_PDF_FILEAREA_RESPONSE', 'submission_pdf_response'); // Response generated once annotation is complete
-*/
 
 define('ASSIGNSUBMISSION_PDF_FILENAME', 'submission.pdf');
 
