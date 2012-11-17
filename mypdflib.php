@@ -432,7 +432,7 @@ class AssignPDFLib extends FPDI {
 
         if ($generate) {
             // Use ghostscript to generate an image of the specified page
-            $gsexec = get_config('assignsubmission_pdf_gspath');
+            $gsexec = get_config('assignsubmission_pdf', 'gspath');
             $imageres = 100;
             $filename = $this->filename;
             $command = "$gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pageno -dLastPage=$pageno -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=\"$imagefile\" \"$filename\" 2>&1";
