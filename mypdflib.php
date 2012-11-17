@@ -315,7 +315,7 @@ class AssignPDFLib extends FPDI {
             $h = 12.0 * $this->scale;
             $sx = min($sx, $ex);
             $sy = min($sy, $ey) - $h * 0.5;
-            $imgfile = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/trans'.$colour.'.png'; // TODO create this path
+            $imgfile = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/trans'.$colour.'.png';
             $this->Image($imgfile, $sx, $sy, $w, $h);
             break;
         case 'freehand':
@@ -356,7 +356,7 @@ class AssignPDFLib extends FPDI {
         static $stamplist = null;
         if ($stamplist == null) {
             $stamplist = array();
-            $basedir = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/stamps'; // TODO create this path
+            $basedir = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/stamps';
             if ($dir = opendir($basedir)) {
                 while (false !== ($file = readdir($dir))) {
                     $pathinfo = pathinfo($file);
