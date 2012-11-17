@@ -36,6 +36,10 @@ require_once($CFG->dirroot.'/mod/assign/locallib.php');
 define('ASSIGNSUBMISSION_PDF_MAXFILES', 20);
 define('ASSIGNSUBMISSION_PDF_MAXSUMMARYFILES', 5);
 
+define('ASSIGNSUBMISSION_PDF_STATUS_NOTSUBMITTED', 0);
+define('ASSIGNSUBMISSION_PDF_STATUS_SUBMITTED', 1);
+define('ASSIGNSUBMISSION_PDF_STATUS_RESPONDED', 2);
+
 /**
  * File areas for file submission assignment
  */

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/pdf/db" VERSION="20121112" COMMENT="XMLDB file for Moodle mod/assign/submission/pdf"
+<XMLDB PATH="mod/assign/submission/pdf/db" VERSION="20121117" COMMENT="XMLDB file for Moodle mod/assign/submission/pdf"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,7 +9,8 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="assignment"/>
         <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="submission"/>
         <FIELD NAME="submission" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="assignment" NEXT="numpages"/>
-        <FIELD NAME="numpages" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The number of pages in the final, submitted document" PREVIOUS="submission"/>
+        <FIELD NAME="numpages" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The number of pages in the final, submitted document" PREVIOUS="submission" NEXT="status"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether the assignment is unsubmitted (0), submitted (1) or responded to (2)" PREVIOUS="numpages"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="assignment"/>

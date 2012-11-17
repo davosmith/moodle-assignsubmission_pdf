@@ -290,21 +290,20 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         $pagecount = $this->create_submission_pdf($submission);
 
-        if ($pagecount) {
-            // Save the pagecount.
-            $submissionpdf = $DB->get_record('assignsubmission_pdf', array('assignment' => $submission->assignment,
-                                                                           'submission' => $submission->id), 'id');
-            $upd = new stdClass();
-            $upd->numpages = $pagecount;
-            if ($submissionpdf) {
-                $upd->id = $submissionpdf->id;
-                $DB->update_record('assignsubmission_pdf', $upd);
-            } else {
-                // This should never really happen, but cope with it anyway.
-                $upd->assignment = $submission->assignment;
-                $upd->submission = $submission->id;
-                $upd->id = $DB->insert_record('assignsubmission_pdf', $upd);
-            }
+        // Save the pagecount.
+        $submissionpdf = $DB->get_record('assignsubmission_pdf', array('assignment' => $submission->assignment,
+                                                                      'submission' => $submission->id), 'id');
+        $upd = new stdClass();
+        $upd->numpages = $pagecount;
+        $upd->status = ASSIGNSUBMISSION_PDF_STATUS_SUBMITTED;
+        if ($submissionpdf) {
+            $upd->id = $submissionpdf->id;
+            $DB->update_record('assignsubmission_pdf', $upd);
+        } else {
+            // This should never really happen, but cope with it anyway.
+            $upd->assignment = $submission->assignment;
+            $upd->submission = $submission->id;
+            $upd->id = $DB->insert_record('assignsubmission_pdf', $upd);
         }
     }
 
