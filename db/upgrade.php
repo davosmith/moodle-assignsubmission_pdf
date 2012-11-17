@@ -31,6 +31,30 @@
 defined('MOODLE_INTERNAL') || die();
 
 function xmldb_assignsubmission_pdf_upgrade($oldversion) {
+    global $DB;
+
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2012111200) {
+
+        // Add field numpages to table assignsubmission_pdf
+        $table = new xmldb_table('assignsubmission_pdf');
+        $field = new xmldb_field('numpages', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'submission');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Remove the old numfiles field
+        $field = new xmldb_field('numfiles', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'submission');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // pdf savepoint reached
+        upgrade_plugin_savepoint(true, 2012111200, 'assignsubmission', 'pdf');
+    }
+
+
     return true;
 }
 

@@ -257,13 +257,13 @@ class assign_submission_pdf extends assign_submission_plugin {
         events_trigger('assessable_file_uploaded', $eventdata);
 
         if ($filesubmission) {
-            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
+            $filesubmission->numpages = 0;
             return $DB->update_record('assignsubmission_pdf', $filesubmission);
         } else {
             $filesubmission = new stdClass();
-            $filesubmission->numfiles = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
+            $filesubmission->numpages = 0;
             return $DB->insert_record('assignsubmission_pdf', $filesubmission)>0;
         }
     }
@@ -288,7 +288,24 @@ class assign_submission_pdf extends assign_submission_plugin {
         $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
                                                                 'userid' => $USER->id));
 
-        $this->create_submission_pdf($submission);
+        $pagecount = $this->create_submission_pdf($submission);
+
+        if ($pagecount) {
+            // Save the pagecount.
+            $submissionpdf = $DB->get_record('assignsubmission_pdf', array('assignment' => $submission->assignment,
+                                                                           'submission' => $submission->id), 'id');
+            $upd = new stdClass();
+            $upd->numpages = $pagecount;
+            if ($submissionpdf) {
+                $upd->id = $submissionpdf->id;
+                $DB->update_record('assignsubmission_pdf', $upd);
+            } else {
+                // This should never really happen, but cope with it anyway.
+                $upd->assignment = $submission->assignment;
+                $upd->submission = $submission->id;
+                $upd->id = $DB->insert_record('assignsubmission_pdf', $upd);
+            }
+        }
     }
 
     protected function get_temp_folder($submissionid) {
@@ -322,7 +339,7 @@ class assign_submission_pdf extends assign_submission_plugin {
                                                false, '', false);
         if ($coversheetfiles) {
             $coversheetfile = reset($coversheetfiles); // Only ever one coversheet file.
-            // TODO - set $templateitems up with the data the user has filled in
+            // TODO davo - set $templateitems up with the data the user has filled in
             $coversheet = $tempdestarea.'/coversheet.pdf';
             if (!$coversheetfile->copy_content_to_($coversheet)) {
                 $errdata = (object)array('coversheet' => $coversheet);
@@ -345,8 +362,9 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         // Combine all the submitted files and the coversheet.
         $mypdf = new AssignPDFLib();
-        if (!$mypdf->combine_pdfs($combinefiles, $destfile, $coversheet, $templateitems)) {
-            return; // No pages found in the submitted files - this shouldn't happen.
+        $pagecount  = $mypdf->combine_pdfs($combinefiles, $destfile, $coversheet, $templateitems);
+        if (!$pagecount) {
+            return 0; // No pages found in the submitted files - this shouldn't happen.
         }
 
         // Copy the combined file into the submission area.
@@ -371,6 +389,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         }
         @rmdir($tempdestarea);
         @rmdir($temparea);
+
+        return $pagecount;
     }
 
     /**

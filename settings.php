@@ -29,12 +29,12 @@ global $CFG;
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/lib.php');
 
 if (isset($CFG->maxbytes)) {
-    $settings->add(new admin_setting_configselect('assignsubmission_pdf_maxbytes',
+    $settings->add(new admin_setting_configselect('assignsubmission_pdf/maxbytes',
                         get_string('maximumsubmissionsize', 'assignsubmission_file'),
                         get_string('configmaxbytes', 'assignsubmission_file'), 1048576, get_max_upload_sizes($CFG->maxbytes)));
 }
 
-$settings->add(new admin_setting_configtext('assignsubmission_pdf_gspath',
+$settings->add(new admin_setting_configtext('assignsubmission_pdf/gspath',
                                             get_string('gspath', 'assignsubmission_pdf'),
                                             get_string('gspath2', 'assignsubmission_pdf'), 'gs'));
 
@@ -42,7 +42,7 @@ $maxfiles = array();
 for ($i=1; $i <= ASSIGNSUBMISSION_PDF_MAXFILES; $i++) {
     $maxfiles[$i] = $i;
 }
-$settings->add(new admin_setting_configselect('assignsubmission_pdf_maxfilesubmissions',
+$settings->add(new admin_setting_configselect('assignsubmission_pdf/maxfilesubmissions',
                                                get_string('defaultmaxfilessubmission', 'assignsubmission_pdf'),
                                                get_string('configmaxfiles', 'assignsubmission_pdf'), 8, $maxfiles));
 

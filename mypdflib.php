@@ -438,9 +438,9 @@ class AssignPDFLib extends FPDI {
             $command = "$gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pageno -dLastPage=$pageno -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=\"$imagefile\" \"$filename\" 2>&1";
             $result = exec($command);
             if (!file_exists($imagefile)) {
-                $fullerror = htmlspecialchars($command).'<br/>';
-                $fullerror .= htmlspecialchars($result).'<br/>';
-                throw new moodle_exception('errorgenerateimage', 'assignfeedback_pdf', '', $fullerror); // TODO create this string
+                $fullerror = 'Command:'.htmlspecialchars($command).'<br/>';
+                $fullerror .= 'Result:'.htmlspecialchars($result).'<br/>';
+                throw new moodle_exception('errorgenerateimage', 'assignfeedback_pdf', '', $fullerror);
             }
         }
 
@@ -485,7 +485,7 @@ class AssignPDFLib extends FPDI {
 
         $file->copy_content_to($tempsrc); // Copy the file
 
-        $gsexec = get_config('assignsubmission_pdf_gspath');
+        $gsexec = get_config('assignsubmission_pdf', 'gspath');
         $command = "$gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=\"$tempdst\" \"$tempsrc\" 2>&1";
         exec($command);
         if (!file_exists($tempdst)) {
