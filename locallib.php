@@ -295,7 +295,11 @@ class assign_submission_pdf extends assign_submission_plugin {
                                                                       'submission' => $submission->id), 'id');
         $upd = new stdClass();
         $upd->numpages = $pagecount;
-        $upd->status = ASSIGNSUBMISSION_PDF_STATUS_SUBMITTED;
+        if ($pagecount) {
+            $upd->status = ASSIGNSUBMISSION_PDF_STATUS_SUBMITTED;
+        } else {
+            $upd->status = ASSIGNSUBMISSION_PDF_STATUS_EMPTY;
+        }
         if ($submissionpdf) {
             $upd->id = $submissionpdf->id;
             $DB->update_record('assignsubmission_pdf', $upd);
