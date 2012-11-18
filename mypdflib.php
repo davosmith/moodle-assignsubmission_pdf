@@ -27,7 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->libdir.'/tcpdf/tcpdf.php');
+require_once($CFG->libdir.'/pdflib.php');
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/fpdi/fpdi.php');
 
 class AssignPDFLib extends FPDI {
@@ -316,7 +316,7 @@ class AssignPDFLib extends FPDI {
             $sx = min($sx, $ex);
             $sy = min($sy, $ey) - $h * 0.5;
             $imgfile = $CFG->dirroot.'/mod/assign/feedback/pdf/pix/trans'.$colour.'.png';
-            //$this->Image($imgfile, $sx, $sy, $w, $h); // TODO davo - fix image output
+            $this->Image($imgfile, $sx, $sy, $w, $h);
             break;
         case 'freehand':
             if ($path) {
@@ -335,7 +335,7 @@ class AssignPDFLib extends FPDI {
             $h = abs($sy - $ey);
             $sx = min($sx, $ex);
             $sy = min($sy, $ey);
-            //$this->Image($imgfile, $sx, $sy, $w, $h); // TODO davo - fix image output
+            $this->Image($imgfile, $sx, $sy, $w, $h);
             break;
         default: // Line
             $this->Line($sx, $sy, $ex, $ey);

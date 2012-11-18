@@ -26,7 +26,7 @@
  * 
  * It'll be loaded and extended by FPDF_TPL.
  */
-class FPDF extends TCPDF {
+class FPDF extends pdf { // Davo - extend Moodle's 'pdf' class not 'TCPDF'
     
 	protected function _putstream($s, $n=0) {
 		$this->_out($this->_getstream($s, $n));
