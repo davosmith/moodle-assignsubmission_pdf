@@ -77,19 +77,18 @@ function assignsubmission_pdf_pluginfile($course, $cm, context $context, $filear
     }
 
     $filename = array_pop($args);
-    $filepath = '/';
+    if (empty($args)) {
+        $filepath = '/';
+    } else {
+        $filepath = '/'.implode('/', $args).'/';
+    }
     if ($filearea == ASSIGNSUBMISSION_PDF_FA_DRAFT) {
         if ($submission->status == ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
             return false; // Already submitted for marking.
         }
-        if (empty($args)) {
-            $filepath = '/';
-        } else {
-            $filepath = '/'.implode('/', $args).'/';
-        }
     } else if ($filearea == ASSIGNSUBMISSION_PDF_FA_FINAL) {
-        if ($filename != ASSIGNSUBMISSION_PDF_FILENAME || !empty($args)) {
-            return false; // Check filename and path (empty)
+        if ($filename != ASSIGNSUBMISSION_PDF_FILENAME) {
+            return false; // Check filename
         }
         if ($submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
             return false; // Not submitted for marking.

@@ -73,7 +73,13 @@ class assign_submission_pdf extends assign_submission_plugin {
         global $CFG, $COURSE;
 
         $defaultmaxfilesubmissions = $this->get_config('maxfilesubmissions');
+        if ($defaultmaxfilesubmissions === false) {
+            $defaultmaxfilesubmissions = get_config('assignsubmission_pdf', 'maxfilesubmissions');
+        }
         $defaultmaxsubmissionsizebytes = $this->get_config('maxsubmissionsizebytes');
+        if ($defaultmaxsubmissionsizebytes === false) {
+            $defaultmaxsubmissionsizebytes = get_config('assignsubmission_pdf', 'maxbytes');
+        }
 
         $settings = array();
         $options = array();
@@ -181,7 +187,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         $fileoptions = $this->get_file_options();
         $submissionid = $submission ? $submission->id : 0;
 
-        file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
+        file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(),
+                                          'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
         $mform->addElement('filemanager', 'pdfs_filemanager', '', null, $fileoptions);
 
         $mform->addElement('static', 'pdf_test', 'Hello', 'Fill in some details before submitting stuff (if there are templates)');
@@ -198,7 +205,8 @@ class assign_submission_pdf extends assign_submission_plugin {
      */
     private function count_files($submissionid, $area) {
         $fs = get_file_storage();
-        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf', $area, $submissionid, "id", false);
+        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
+                                     $area, $submissionid, "id", false);
 
         return count($files);
     }
@@ -218,7 +226,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         // Pre-process all files to convert to useful PDF format
         $fileoptions = $this->get_file_options();
 
-        file_postupdate_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(), 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
+        file_postupdate_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(),
+                                             'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
 
         $filesubmission = $this->get_file_submission($submission->id);
 
@@ -226,7 +235,8 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         $fs = get_file_storage();
         /** @var $files stored_file[] */
-        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "id", false);
+        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
+                                     ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "id", false);
         // Check all files are PDF v1.4 or less
         foreach ($files as $key => $file) {
             if (!AssignPDFLib::ensure_pdf_compatible($file)) {
@@ -378,7 +388,7 @@ class assign_submission_pdf extends assign_submission_plugin {
             'filearea' => ASSIGNSUBMISSION_PDF_FA_FINAL,
             'itemid' => $submission->id,
             'filename' => ASSIGNSUBMISSION_PDF_FILENAME,
-            'filepath' => '/'
+            'filepath' => $this->get_subfolder()
         );
         $fs->create_file_from_pathname($fileinfo, $destfile);
 
@@ -407,7 +417,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         $fs = get_file_storage();
 
         /** @var $files stored_file[] */
-        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "timemodified", false);
+        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
+                                     ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "timemodified", false);
 
         foreach ($files as $file) {
             $result[$file->get_filename()] = $file;
@@ -460,7 +471,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         } else {
             $context = $this->assignment->get_context();
             $url = moodle_url::make_pluginfile_url($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_FINAL,
-                                                   $submission->id, '/', ASSIGNSUBMISSION_PDF_FILENAME, true);
+                                                   $submission->id, $this->get_subfolder(), ASSIGNSUBMISSION_PDF_FILENAME,
+                                                   true);
             $output .= html_writer::link($url, get_string('finalsubmission', 'assignsubmission_pdf'));
         }
 
@@ -618,5 +630,25 @@ class assign_submission_pdf extends assign_submission_plugin {
             ASSIGNSUBMISSION_PDF_FA_DRAFT => get_string('draftfor', 'assignsubmission_pdf', $name),
             ASSIGNSUBMISSION_PDF_FA_FINAL => get_string('finalfor', 'assignsubmission_pdf', $name)
         );
+    }
+
+    protected function get_resubmission_number() {
+        $resub = $this->get_config('resubmission');
+        if ($resub === false) {
+            $resub = 1;
+            $this->set_config('resubmission', $resub);
+        }
+        return $resub;
+    }
+
+    protected function set_resubmission_number($resubmission) {
+        $this->set_config('resubmission', $resubmission);
+    }
+
+    protected function get_subfolder($resubmission = null) {
+        if (is_null($resubmission)) {
+            $resubmission = $this->get_resubmission_number();
+        }
+        return '/'.$resubmission.'/';
     }
 }
