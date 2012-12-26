@@ -57,7 +57,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @param int $submissionid
      * @return mixed
      */
-    private function get_file_submission($submissionid) {
+    private function get_pdf_submission($submissionid) {
         global $DB;
         return $DB->get_record('assignsubmission_pdf', array('submission' => $submissionid));
     }
@@ -229,7 +229,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         file_postupdate_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(),
                                              'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id);
 
-        $filesubmission = $this->get_file_submission($submission->id);
+        $pdfsubmission = $this->get_pdf_submission($submission->id);
 
         //plagiarism code event trigger when files are uploaded
 
@@ -238,6 +238,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
                                      ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "id", false);
         // Check all files are PDF v1.4 or less
+        $submissionok = true;
         foreach ($files as $key => $file) {
             if (!AssignPDFLib::ensure_pdf_compatible($file)) {
                 $filename = $file->get_filename();
@@ -247,7 +248,12 @@ class assign_submission_pdf extends assign_submission_plugin {
                     $SESSION->assignsubmission_pdf_invalid = array();
                 }
                 $SESSION->assignsubmission_pdf_invalid[] = $filename;
+                $submissionok = false;
             }
+        }
+
+        if (!$submissionok) {
+            return false;
         }
 
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
@@ -266,16 +272,23 @@ class assign_submission_pdf extends assign_submission_plugin {
         $eventdata->pathnamehashes = array_keys($files);
         events_trigger('assessable_file_uploaded', $eventdata);
 
-        if ($filesubmission) {
-            $filesubmission->numpages = 0;
-            return $DB->update_record('assignsubmission_pdf', $filesubmission);
+        if ($pdfsubmission) {
+            $pdfsubmission->numpages = 0;
+            $DB->update_record('assignsubmission_pdf', $pdfsubmission);
         } else {
-            $filesubmission = new stdClass();
-            $filesubmission->submission = $submission->id;
-            $filesubmission->assignment = $this->assignment->get_instance()->id;
-            $filesubmission->numpages = 0;
-            return $DB->insert_record('assignsubmission_pdf', $filesubmission)>0;
+            $pdfsubmission = new stdClass();
+            $pdfsubmission->submission = $submission->id;
+            $pdfsubmission->assignment = $this->assignment->get_instance()->id;
+            $pdfsubmission->numpages = 0;
+            $DB->insert_record('assignsubmission_pdf', $pdfsubmission);
         }
+
+        if (!$this->assignment->get_instance()->submissiondrafts) {
+            // No 'submit assignment' button - need to submit immediately
+            $this->submit_for_grading($submission);
+        }
+
+        return true;
     }
 
     /**
