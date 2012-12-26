@@ -80,6 +80,10 @@ class assign_submission_pdf extends assign_submission_plugin {
         if ($defaultmaxsubmissionsizebytes === false) {
             $defaultmaxsubmissionsizebytes = get_config('assignsubmission_pdf', 'maxbytes');
         }
+        $defaulttemplateid = $this->get_config('templateid');
+        if ($defaulttemplateid === false) {
+            $defaulttemplateid = 0;
+        }
 
         $settings = array();
         $options = array();
@@ -119,8 +123,8 @@ class assign_submission_pdf extends assign_submission_plugin {
         foreach ($templates_data as $templateid => $templatename) {
             $templates[$templateid] = $templatename;
         }
-
         $mform->addElement('select', 'assignsubmission_pdf_templateid', get_string('coversheettemplate', 'assignsubmission_pdf'), $templates);
+        $mform->setDefault('assignsubmission_pdf_templateid', $defaulttemplateid);
 
         $edittemplateurl = new moodle_url('/mod/assign/submission/pdf/edittemplates.php', array('courseid' => $COURSE->id));
         $edittemplatelink = html_writer::link($edittemplateurl, get_string('edittemplates', 'assignsubmission_pdf'),
