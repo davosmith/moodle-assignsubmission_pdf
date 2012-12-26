@@ -35,6 +35,7 @@ $string['configmaxfiles'] = 'The default value for the \'Maximum number of uploa
 $string['countfiles'] = '{$a} files';
 $string['coversheet'] = 'Coversheet to attach';
 $string['coversheet_help'] = 'The coversheet will be automatically added before the combined PDFs that the student submits.';
+$string['coversheetnotice'] = 'The following coversheet will be automatically added to your submission';
 $string['coversheettemplate'] = 'Coversheet template';
 $string['coversheetfor'] = 'Coversheet for {$a}';
 $string['dateformatlink'] = 'Date format help';

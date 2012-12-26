@@ -194,12 +194,25 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
-        if ($this->get_config('maxfilesubmissions')<=0) {
+        if ($this->get_config('maxfilesubmissions') <= 0) {
             return false;
         }
 
         $fileoptions = $this->get_file_options();
         $submissionid = $submission ? $submission->id : 0;
+
+        $context = $this->assignment->get_context();
+        $fs = get_file_storage();
+        $coversheetfiles = $fs->get_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET,
+                                               false, '', false);
+        if ($coversheetfiles) {
+            /** @var stored_file $file */
+            $file = reset($coversheetfiles);
+            $fileurl = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                                                       null, $file->get_filepath(), $file->get_filename());
+            $filelink = html_writer::link($fileurl, $file->get_filename(), array('target' => '_blank'));
+            $mform->addElement('static', 'pdf_coversheet', '', get_string('coversheetnotice', 'assignsubmission_pdf').': '.$filelink);
+        }
 
         file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(),
                                           'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);

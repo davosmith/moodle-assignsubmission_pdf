@@ -57,48 +57,63 @@ function assignsubmission_pdf_pluginfile($course, $cm, context $context, $filear
         return false;
     }
 
-    $submissionid = array_shift($args);
-    $submission = $DB->get_record('assign_submission', array('id' => $submissionid));
-
-    if ($submission->assignment != $cm->instance) {
-        return false; // Submission does not belong to this assignment.
-    }
-
-    if ($USER->id == $submission->userid) {
-        // Own submission - check permission to submit.
-        if (!has_capability('mod/assign:submit', $context)) {
-            return false;
-        }
-    } else {
-        // Another user's submission - check permission to grade.
+    if ($filearea == ASSIGNSUBMISSION_PDF_FA_COVERSHEET) {
+        // Coversheet
         if (!has_capability('mod/assign:grade', $context)) {
+            require_capability('mod/assign:submit', $context);
+        }
+
+        $itemid = 0;
+        $filename = array_pop($args);
+
+    } else {
+        // submission file
+        $submissionid = array_shift($args);
+        $submission = $DB->get_record('assign_submission', array('id' => $submissionid));
+
+        if ($submission->assignment != $cm->instance) {
+            return false; // Submission does not belong to this assignment.
+        }
+
+        if ($USER->id == $submission->userid) {
+            // Own submission - check permission to submit.
+            if (!has_capability('mod/assign:submit', $context)) {
+                return false;
+            }
+        } else {
+            // Another user's submission - check permission to grade.
+            if (!has_capability('mod/assign:grade', $context)) {
+                return false;
+            }
+        }
+
+        $filename = array_pop($args);
+        if ($filearea == ASSIGNSUBMISSION_PDF_FA_DRAFT) {
+            if ($submission->status == ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+                return false; // Already submitted for marking.
+            }
+        } else if ($filearea == ASSIGNSUBMISSION_PDF_FA_FINAL) {
+            if ($filename != ASSIGNSUBMISSION_PDF_FILENAME) {
+                return false; // Check filename
+            }
+            if ($submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
+                return false; // Not submitted for marking.
+            }
+        } else {
             return false;
         }
+
+        $itemid = $submission->id;
     }
 
-    $filename = array_pop($args);
     if (empty($args)) {
         $filepath = '/';
     } else {
         $filepath = '/'.implode('/', $args).'/';
     }
-    if ($filearea == ASSIGNSUBMISSION_PDF_FA_DRAFT) {
-        if ($submission->status == ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
-            return false; // Already submitted for marking.
-        }
-    } else if ($filearea == ASSIGNSUBMISSION_PDF_FA_FINAL) {
-        if ($filename != ASSIGNSUBMISSION_PDF_FILENAME) {
-            return false; // Check filename
-        }
-        if ($submission->status != ASSIGN_SUBMISSION_STATUS_SUBMITTED) {
-            return false; // Not submitted for marking.
-        }
-    } else {
-        return false;
-    }
 
     $fs = get_file_storage();
-    $file = $fs->get_file($context->id, 'assignsubmission_pdf', $filearea, $submission->id, $filepath, $filename);
+    $file = $fs->get_file($context->id, 'assignsubmission_pdf', $filearea, $itemid, $filepath, $filename);
     if ($file) {
         send_stored_file($file, 86400, 0, $forcedownload);
     }
