@@ -69,6 +69,21 @@ function xmldb_assignsubmission_pdf_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2012111700, 'assignsubmission', 'pdf');
     }
 
+    if ($oldversion < 2012122600) {
+
+        // Define field templatedata to be added to assignsubmission_pdf
+        $table = new xmldb_table('assignsubmission_pdf');
+        $field = new xmldb_field('templatedata', XMLDB_TYPE_TEXT, null, null, null, null, null, 'status');
+
+        // Conditionally launch add field templatedata
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // pdf savepoint reached
+        upgrade_plugin_savepoint(true, 2012122600, 'assignsubmission', 'pdf');
+    }
+
     return true;
 }
 

@@ -194,6 +194,8 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
+        global $DB;
+
         if ($this->get_config('maxfilesubmissions') <= 0) {
             return false;
         }
@@ -218,7 +220,31 @@ class assign_submission_pdf extends assign_submission_plugin {
                                           'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
         $mform->addElement('filemanager', 'pdfs_filemanager', '', null, $fileoptions);
 
-        $mform->addElement('static', 'pdf_test', 'Hello', 'Fill in some details before submitting stuff (if there are templates)');
+        if ($coversheetfiles) {
+            if ($templateid = $this->get_config('templateid')) {
+                $templateitems = $DB->get_records('assignsubmission_pdf_tmplit', array('templateid' => $templateid));
+                $templatedata = array();
+                if ($submissionid) {
+                    if ($templatedata = $DB->get_field('assignsubmission_pdf', 'templatedata', array('submission' => $submissionid))) {
+                        $templatedata = unserialize($templatedata);
+                    }
+                }
+                foreach ($templateitems as $item) {
+                    $elname = "pdf_template[{$item->id}]";
+                    if ($item->type == 'shorttext') {
+                        $mform->addElement('text', $elname, s($item->setting));
+                    } else if ($item->type == 'text') {
+                        $mform->addElement('textarea', $elname, s($item->setting));
+                    } else {
+                        continue;
+                    }
+                    $mform->addRule($elname, null, 'required', null, 'client');
+                    if (isset($templatedata[$item->id])) {
+                        $mform->setDefault($elname, $templatedata[$item->id]);
+                    }
+                }
+            }
+        }
 
         return true;
     }
@@ -283,6 +309,11 @@ class assign_submission_pdf extends assign_submission_plugin {
             return false;
         }
 
+        $templatedata = null;
+        if (isset($data->pdf_template)) {
+            $templatedata = serialize($data->pdf_template);
+        }
+
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
         // send files to event system
         // Let Moodle know that an assessable file was uploaded (eg for plagiarism detection)
@@ -301,12 +332,14 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         if ($pdfsubmission) {
             $pdfsubmission->numpages = 0;
+            $pdfsubmission->templatedata = $templatedata;
             $DB->update_record('assignsubmission_pdf', $pdfsubmission);
         } else {
             $pdfsubmission = new stdClass();
             $pdfsubmission->submission = $submission->id;
             $pdfsubmission->assignment = $this->assignment->get_instance()->id;
             $pdfsubmission->numpages = 0;
+            $pdfsubmission->templatedata = $templatedata;
             $DB->insert_record('assignsubmission_pdf', $pdfsubmission);
         }
 
@@ -391,10 +424,11 @@ class assign_submission_pdf extends assign_submission_plugin {
         $coversheetfiles = $fs->get_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET,
                                                false, '', false);
         if ($coversheetfiles) {
+            /** @var stored_file $coversheetfile */
             $coversheetfile = reset($coversheetfiles); // Only ever one coversheet file.
             // TODO davo - set $templateitems up with the data the user has filled in
             $coversheet = $tempdestarea.'/coversheet.pdf';
-            if (!$coversheetfile->copy_content_to_($coversheet)) {
+            if (!$coversheetfile->copy_content_to($coversheet)) {
                 $errdata = (object)array('coversheet' => $coversheet);
                 throw new moodle_exception('errorcoversheet', 'assignsubmission_pdf', '', null, $errdata);
             }
