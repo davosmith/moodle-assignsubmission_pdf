@@ -603,10 +603,19 @@ class assign_submission_pdf extends assign_submission_plugin {
      */
     public function delete_instance() {
         global $DB;
-        // will throw exception on failure
-        $DB->delete_records('assignsubmission_pdf', array('assignment' => $this->assignment->get_instance()->id));
 
-        // TODO davo - lots of cleanup needed here
+        $params = array('assignment' => $this->assignment->get_instance()->id);
+        $submissions = $DB->get_records('assignsubmission_pdf', $params);
+        foreach ($submissions as $submission) {
+            // Delete any comments / annotations on the submissions.
+            $DB->delete_records('assignfeedback_pdf_annot', array('submissionid' => $submission->submission));
+            $DB->delete_records('assignfeedback_pdf_cmnt', array('submissionid' => $submission->submission));
+        }
+
+        // Delete all PDF submission records for this assignment
+        $DB->delete_records('assignsubmission_pdf', $params);
+
+        // All files in the module context are automatically deleted - no need to delete each area individually
 
         return true;
     }
