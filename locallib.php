@@ -403,6 +403,8 @@ class assign_submission_pdf extends assign_submission_plugin {
     }
 
     protected function create_submission_pdf(stdClass $submission) {
+        global $DB;
+
         $fs = get_file_storage();
 
         $context = $this->assignment->get_context();
@@ -426,11 +428,24 @@ class assign_submission_pdf extends assign_submission_plugin {
         if ($coversheetfiles) {
             /** @var stored_file $coversheetfile */
             $coversheetfile = reset($coversheetfiles); // Only ever one coversheet file.
-            // TODO davo - set $templateitems up with the data the user has filled in
             $coversheet = $tempdestarea.'/coversheet.pdf';
             if (!$coversheetfile->copy_content_to($coversheet)) {
                 $errdata = (object)array('coversheet' => $coversheet);
                 throw new moodle_exception('errorcoversheet', 'assignsubmission_pdf', '', null, $errdata);
+            }
+            if ($templateid = $this->get_config('templateid')) {
+                $templateitems = $DB->get_records('assignsubmission_pdf_tmplit', array('templateid' => $templateid));
+                $templatedata = $DB->get_field('assignsubmission_pdf', 'templatedata', array('submission' => $submission->id));
+                if (!empty($templatedata)) {
+                    $templatedata = unserialize($templatedata);
+                }
+                foreach ($templateitems as $item) {
+                    if (isset($templatedata[$item->id])) {
+                        $item->data = $templatedata[$item->id];
+                    } else {
+                        $item->data = '';
+                    }
+                }
             }
         }
 
