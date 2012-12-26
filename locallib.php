@@ -70,7 +70,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
-        global $CFG, $COURSE;
+        global $CFG, $COURSE, $DB;
 
         $defaultmaxfilesubmissions = $this->get_config('maxfilesubmissions');
         if ($defaultmaxfilesubmissions === false) {
@@ -105,14 +105,27 @@ class assign_submission_pdf extends assign_submission_plugin {
         $mform->setDefault('assignsubmission_pdf_maxsizebytes', $defaultmaxsubmissionsizebytes);
         $mform->disabledIf('assignsubmission_pdf_maxsizebytes', 'assignsubmission_pdf_enabled', 'eq', 0);
 
+        // Coversheet
         $mform->addElement('filemanager', 'assignsubmission_pdf_coversheet', get_string('coversheet', 'assignsubmission_pdf'), null,
                            array(
                                 'subdirs' => 0, 'maxbytes' => $COURSE->maxbytes,
                                 'maxfiles' => 1, 'accepted_types' => array('*.pdf')
                            ));
 
-        $mform->addElement('static', 'assignsubmission_pdf_template', '', 'Select template here');
-        $mform->addElement('static', 'assignsubmission_pdf_template_edit', '', 'Edit templates here');
+        // Templates
+        $templates = array();
+        $templates[0] = get_string('notemplate','assignsubmission_pdf');
+        $templates_data = $DB->get_records_select_menu('assignsubmission_pdf_tmpl', 'courseid = 0 OR courseid = ?', array($COURSE->id), 'name', 'id, name');
+        foreach ($templates_data as $templateid => $templatename) {
+            $templates[$templateid] = $templatename;
+        }
+
+        $mform->addElement('select', 'assignsubmission_pdf_templateid', get_string('coversheettemplate', 'assignsubmission_pdf'), $templates);
+
+        $edittemplateurl = new moodle_url('/mod/assign/submission/pdf/edittemplates.php', array('courseid' => $COURSE->id));
+        $edittemplatelink = html_writer::link($edittemplateurl, get_string('edittemplates', 'assignsubmission_pdf'),
+                                              array('target' => '_blank'));
+        $mform->addElement('static', 'assignsubmission_pdf_template_edit', '', $edittemplatelink);
     }
 
     /**
@@ -143,6 +156,7 @@ class assign_submission_pdf extends assign_submission_plugin {
     public function save_settings(stdClass $data) {
         $this->set_config('maxfilesubmissions', $data->assignsubmission_pdf_maxfiles);
         $this->set_config('maxsubmissionsizebytes', $data->assignsubmission_pdf_maxsizebytes);
+        $this->set_config('templateid', $data->assignsubmission_pdf_templateid);
 
         $context = $this->assignment->get_context();
         $course = $this->assignment->get_course();
