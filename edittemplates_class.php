@@ -466,11 +466,11 @@ class edit_templates {
         }
 
         if ($id == -1) {
-            $id = $DB->insert_record('assignsubmission_pdf_tmpl', $template);
+            $template->id = $DB->insert_record('assignsubmission_pdf_tmpl', $template);
             $this->extrajs .= '<script type="text/javascript">';
             $this->extrajs .= 'var el=window.opener.document.getElementById("id_assignsubmission_pdf_templateid");';
             $this->extrajs .= 'if (el) {';
-            $this->extrajs .= 'var newtemp = window.opener.document.createElement("option"); newtemp.value = "'.$this->templateid.'"; newtemp.innerHTML = "'.s($template->name).'";';
+            $this->extrajs .= 'var newtemp = window.opener.document.createElement("option"); newtemp.value = "'.$template->id.'"; newtemp.innerHTML = "'.s($template->name).'";';
             $this->extrajs .= 'el.appendChild(newtemp); ';
             $this->extrajs .= '}';
             $this->extrajs .= '</script>';
@@ -483,7 +483,7 @@ class edit_templates {
                 $this->extrajs .= 'if (el) {';
                 $this->extrajs .= 'var opts = el.getElementsByTagName("option"); var i=0;';
                 $this->extrajs .= 'for (i=0; i<opts.length; i++) {';
-                $this->extrajs .= 'if (opts[i].value == "'.$this->templateid.'") {';
+                $this->extrajs .= 'if (opts[i].value == "'.$template->id.'") {';
                 $this->extrajs .= 'opts[i].innerHTML = "'. s($template->name) .'";';
                 $this->extrajs .= '}}}';
                 $this->extrajs .= '</script>';
@@ -653,7 +653,7 @@ class edit_templates {
 
         // Update the list on the main page
         $this->extrajs .= '<script type="text/javascript">';
-        $this->extrajs .= 'var el=window.opener.document.getElementById("id_template");';
+        $this->extrajs .= 'var el=window.opener.document.getElementById("id_assignsubmission_pdf_templateid");';
         $this->extrajs .= 'if (el) {';
         $this->extrajs .= 'var newtemp = window.opener.document.createElement("option"); newtemp.value = "'.$dstid.'"; newtemp.innerHTML = "'.s($template->name).'";';
         $this->extrajs .= 'el.appendChild(newtemp); ';

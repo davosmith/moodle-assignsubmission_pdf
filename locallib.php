@@ -360,8 +360,38 @@ class assign_submission_pdf extends assign_submission_plugin {
      * the data required.
      * @return bool|string 'true' if all data supplied, message if some data still needed
      */
-    public function precheck_submission() {
-        // TODO davo - check coversheet data has been supplied
+    public function precheck_submission($submission = null) {
+        global $DB, $USER;
+
+        if (is_null($submission)) {
+            $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
+                                                                    'userid' => $USER->id));
+        }
+        $fs = get_file_storage();
+        $context = $this->assignment->get_context();
+        $coversheetfiles = $fs->get_area_files($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_COVERSHEET,
+                                               false, '', false);
+
+        $msg = array();
+        if ($coversheetfiles) {
+            if ($templateid = $this->get_config('templateid')) {
+                $templateitems = $DB->get_records('assignsubmission_pdf_tmplit', array('templateid' => $templateid));
+                $templatedata = $DB->get_field('assignsubmission_pdf', 'templatedata', array('submission' => $submission->id));
+                if (!empty($templatedata)) {
+                    $templatedata = unserialize($templatedata);
+                }
+                foreach ($templateitems as $item) {
+                    if ($item->type != 'date' && !isset($templatedata[$item->id])) {
+                        $msg[] = get_string('missingfield', 'assignsubmission_pdf', $item->name);
+                    }
+                }
+            }
+        }
+
+        if (!empty($msg)) {
+            return implode('<br />', $msg);
+        }
+
         return true;
     }
 
@@ -372,9 +402,10 @@ class assign_submission_pdf extends assign_submission_plugin {
      */
     public function submit_for_grading(stdClass $submission = null) {
         global $DB, $USER;
-        $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
-                                                                'userid' => $USER->id));
-
+        if (is_null($submission)) {
+            $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
+                                                                    'userid' => $USER->id));
+        }
         $pagecount = $this->create_submission_pdf($submission);
 
         // Save the pagecount.

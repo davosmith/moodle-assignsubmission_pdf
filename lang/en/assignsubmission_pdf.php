@@ -67,6 +67,7 @@ $string['itemx'] = 'Position from left';
 $string['itemy'] = 'Position from top';
 $string['maxbytes'] = 'Maximum file size';
 $string['maxfilessubmission'] = 'Maximum number of uploaded PDFs';
+$string['missingfield'] = 'You must fill in the \'{$a}\' field on the submission form.';
 $string['newitem'] = 'New item';
 $string['newtemplate'] = 'New template';
 $string['notemplate'] = 'No template';
