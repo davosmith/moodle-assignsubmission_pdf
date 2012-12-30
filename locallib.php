@@ -382,7 +382,7 @@ class assign_submission_pdf extends assign_submission_plugin {
                 }
                 foreach ($templateitems as $item) {
                     if ($item->type != 'date' && !isset($templatedata[$item->id])) {
-                        $msg[] = get_string('missingfield', 'assignsubmission_pdf', $item->name);
+                        $msg[] = get_string('missingfield', 'assignsubmission_pdf', $item->setting);
                     }
                 }
             }
