@@ -1,46 +1,35 @@
-This is a very incomplete conversion of my Moodle 1.9-2.2 UploadPDF plugin to work with Moodle 2.3.
+PDF Submission / Feedback plugin
+--------------------------------
 
-Do not install it on a production site - it is more than broken, it is totally incomplete and not yet useful.
-
------------------------------
-
-This plugin for the assignment module allows a teacher to annotate and
-return PDF files that have been submitted by students.
+These plugins for the assignment module allows a teacher to annotate and
+return PDF files that have been submitted by students. It is based on my
+previous 'UploadPDF' assignment type, updated to work with the Moodle 2.3+
+'assign' module (rather than the Moodle 2.0-2.2 'assignment' module).
 
 Teachers can add and position comments and draw lines, ovals, stamps,
 rectangles and highlights onto the student's work, from within the browser,
 before returning the work to the student.
 
-This plugin is available in Moodle 2.3, Moodle 2.0-2.2 and Moodle 1.9 versions.
-This is the **Moodle 2.3** version - you can download the Moodle 1.9 version
+This plugin is available in Moodle 2.3+, Moodle 2.0-2.2 and Moodle 1.9 versions.
+This is the **Moodle 2.3+** version - you can download the Moodle 1.9 version
 from here:
 https://github.com/davosmith/moodle-uploadpdf/zipball/MOODLE_19_STABLE
 
 and the Moodle 2.0-2.2 version here:
 https://github.com/davosmith/moodle-uploadpdf/zipball/master
 
-The latest version of the Moodle 2.3 version will be available here:
+The latest version of the Moodle 2.3+ version is available here:
 https://github.com/davosmith/moodle-assignsubmission_pdf/zipball/master
+https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 !! THERE ARE A FEW IMPORTANT ITEMS TO NOTE IN THE INSTALLATION, PLEASE
    READ CAREFULLY !!
 
 ==Recent changes==
 
-* ?? - Complete rewrite to work with Moodle 2.3 assign type
-* 2012-02-11 - Fixed alignment of 'highlighter' tool
-* 2012-02-07 - Fixed bug in temporary path when creating submissions
-* 2012-02-04 - Added 'highlighter' tool & 'stamps' tool
-* 2012-02-04 - Can now cope with any PDF version; fixed browser caching of images when PDF is changed, YUI CSS path
-* 2012-02-02 - Fixed postgres compatibility - thanks to Ruslan Kabalin
-* 2011-12-07 - Fixed jquery conflicts
-* 2011-10-21 - Fixed issues with updated version of Raphael library
-* 2011-10-10 - Fixed IE9 incompatibility issues
-* 2011-08-30 - Previous version posted on Moodle.org
+* 2012-12-31 - Complete rewrite to work with Moodle 2.3+ assign type
 
 ==Installation==
-
-Note: this plugin needs PHP 5.2.0 (or above) for the JSON library.
 
 1. Download and install GhostScript ( http://pages.cs.wisc.edu/~ghost )
   - or install from standard respositories, if using Linux.
@@ -50,62 +39,51 @@ Note: this plugin needs PHP 5.2.0 (or above) for the JSON library.
   'gswin32c.exe' and the dll file from the 'bin' folder, all other
   files are unnecessary for this to work).
 
-!! THIS IS OUT OF DATE - TO BE UPDATED WHEN I FINISH THE PLUGIN !!
+2. Unzip the submission pdf and feedback pdf plugin files to folders on
+  your local machine
 
-2. Unzip the Uploadpdf plugin files to a folder on your local machine
+3. Upload the plugin files to <siteroot>/mod/assign/submission/pdf
+  and <siteroot>/mod/assign/feedback/pdf
 
-(3.) (Windows server only):
+4. Log in to Moodle as administrator, then click on 'Home'.
 
+5. Visit 'Site admin > Plugins > Assignment plugins > Submission Plugins >
+  PDF Submission'. Adjust the 'Ghostscript path' to where ghostscript
+  is installed (should not need changing on a Linux install).
 
-!! CHANGE THIS BIT AS IT IS OUT OF DATE !!
-
-
-Edit the file 'uploadpdf_config.php'  to
-  include the path to where you installed GhostScript (see instructions
-  in that file for more information)
-
-4. Upload the plugin files to <siteroot>/mod/assign/submission/pdf
-
-5. Log in to Moodle as administrator, then click on 'Notifications'.
-
-All being well, you should now be able to add assignments of type
-'uploadpdf' to your courses.
+All being well, you should now be able to add submission and feedback
+type 'pdf' to assignments.
 
 ==How to use==
 
-!! THIS SECTION IS OUT OF DATE - REWRITE IT !!
-
-* Add a new activity of the type 'Upload PDF' to a course. (This may
-  well show up as '[[typeuploadpdf]]' see 'Known Issues', below).
+* Add a new Assignment to a course.
 
 * Configure all the usual settings - you should be aware of the
   following additions:
 
-  Coversheet - this is a PDF that will be automatically prepended to
+  PDF submission - set to 'Yes' to allow students to submit PDFs for annotation
+
+  PDF feedback - set to 'Yes' to allow the submitted PDFs to be annotated (note this ONLY works with PDFs submitted via the 'PDF submission' plugin).
+
+  Coversheet - this is a PDF that will be automatically added to
   the start of any files submitted by your students
 
   Template - before submission your students can be (optionally) asked
   to fill in some text fields, the template is used to add these
-  entries to the coversheet
+  entries to the coversheet (this is ignored, if no coversheet is selected).
 
   Edit Templates... - see section below
 
-* When a student uploads their files and clicks 'Submit' they will be
-  checked to see if they are all PDFs (depending on the setting
-  above), before combining them together into a single
-  'submission.pdf'.
+* It is recommended this is used with the 'Require students click submit button' option, as then the processing and combining of the submission PDFs is only done once they click that button. Otherwise, the processing is done every time the student updates their submission.
 
-(Hint: to help students generate PDF files, either use OpenOffice.org
-- http://www.openoffice.org - which has PDF export built in, or
+* When a student uploads their files and clicks 'Submit' they will be combined them together into a single
+  submission (along with the coversheet).
+
+(Hint: to help students generate PDF files,
 install a PDF printer, such as PDF Creator -
-http://sourceforge.net/projects/pdfcreator
-Hint2: A copy of PDFTK
-Builder - http://angusj.com/pdftk - will help students to combine
-their PDF files together in the order they want; my 'uploadpdf' plugin
-will just join them in the order they are uploaded).
+http://sourceforge.net/projects/pdfcreator).
 
-* The teacher can then log in, go to the usual marking screen (I
-  particualarly recommend 'Allow quick grading') and click on
+* The teacher can then log in, go to the usual marking screen and click on
   'Annotate submission', which will bring up the first page of the
   student's work on screen.
 
@@ -195,6 +173,5 @@ been possible without their hard work (and their free software licensing)
 
 ==Contact==
 moodle AT davosmith DOT co DOT uk
-or via http://www.davodev.co.uk/contact
 
 Davo Smith
