@@ -472,7 +472,7 @@ class AssignPDFLib extends FPDI {
             return true; // We can handle this version - nothing else to do
         }
 
-        $temparea = $CFG->dataroot.'/temp/uploadpdf';
+        $temparea = $CFG->dataroot.'/temp/assignsubmission_pdf';
         $hash = $file->get_contenthash(); // Use the contenthash to make sure the temp files have unique names.
         $tempsrc = $temparea."/src-$hash.pdf";
         $tempdst = $temparea."/dst-$hash.pdf";

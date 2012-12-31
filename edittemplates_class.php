@@ -21,7 +21,7 @@ class edit_templates {
         $this->imagetime = $imagetime;
         $this->itemid = $itemid;
 
-        $this->url = new moodle_url('/mod/assignment/type/uploadpdf/edittemplate.php', array('courseid'=>$courseid) );
+        $this->url = new moodle_url('/mod/assign/submission/pdf/edittemplate.php', array('courseid'=>$courseid) );
         if ($templateid) { $this->url->param('templateid', $templateid); }
         if ($itemid) { $this->url->param('itemid', $itemid); }
         if ($imagetime) { $this->url->param('imagetime', $imagetime); }

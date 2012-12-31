@@ -432,7 +432,7 @@ class assign_submission_pdf extends assign_submission_plugin {
     protected function get_temp_folder($submissionid) {
         global $CFG, $USER;
 
-        $tempfolder = $CFG->dataroot.'/temp/uploadpdf/';
+        $tempfolder = $CFG->dataroot.'/temp/assignsubmission_pdf/';
         $tempfolder .= sha1("{$submissionid}_{$USER->id}_".time());
         return $tempfolder;
     }
