@@ -29,3 +29,4 @@ $plugin->requires  = 2012062500;
 $plugin->component = 'assignsubmission_pdf';
 $plugin->maturity  = MATURITY_BETA;
 $plugin->cron      = 0;
+$plugin->dependencies = array('assignfeedback_pdf' => 2012123100);
