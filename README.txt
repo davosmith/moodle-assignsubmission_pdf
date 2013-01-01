@@ -31,6 +31,12 @@ https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 ==Installation==
 
+Note - the assignsubmission_pdf plugin can, theoretically, be used without the
+assignfeedback_pdf plugin. On its own, however, it has little advantage over
+the standard 'file' submission plugin (other than coversheet handling). The
+assignfeedback_pdf will not do anything on its own (and cannot be installed
+without the submission plugin).
+
 1. Download and install GhostScript ( http://pages.cs.wisc.edu/~ghost )
   - or install from standard respositories, if using Linux.
   Under Windows, do not install to a path with a space in it - that
@@ -58,15 +64,16 @@ type 'pdf' to assignments.
 
 * Add a new Assignment to a course.
 
-* Configure all the usual settings - you should be aware of the
-  following additions:
+* Configure all the usual settings - you should be aware of the following
+  additions:
 
   PDF submission - set to 'Yes' to allow students to submit PDFs for annotation
 
-  PDF feedback - set to 'Yes' to allow the submitted PDFs to be annotated (note this ONLY works with PDFs submitted via the 'PDF submission' plugin).
+  PDF feedback - set to 'Yes' to allow the submitted PDFs to be annotated (note
+  this ONLY works with PDFs submitted via the 'PDF submission' plugin).
 
-  Coversheet - this is a PDF that will be automatically added to
-  the start of any files submitted by your students
+  Coversheet - this is a PDF that will be automatically added to the start of
+  any files submitted by your students
 
   Template - before submission your students can be (optionally) asked
   to fill in some text fields, the template is used to add these
@@ -74,14 +81,16 @@ type 'pdf' to assignments.
 
   Edit Templates... - see section below
 
-* It is recommended this is used with the 'Require students click submit button' option, as then the processing and combining of the submission PDFs is only done once they click that button. Otherwise, the processing is done every time the student updates their submission.
+* It is recommended this is used with the 'Require students click submit button'
+  option, as then the processing and combining of the submission PDFs is only
+  done once they click that button. Otherwise, the processing is done every time
+  the student updates their submission.
 
-* When a student uploads their files and clicks 'Submit' they will be combined them together into a single
-  submission (along with the coversheet).
+* When a student uploads their files and clicks 'Submit' they will be combined
+  them together into a single submission (along with the coversheet).
 
-(Hint: to help students generate PDF files,
-install a PDF printer, such as PDF Creator -
-http://sourceforge.net/projects/pdfcreator).
+(Hint: to help students generate PDF files, install a PDF printer, such as
+ PDF Creator - http://sourceforge.net/projects/pdfcreator).
 
 * The teacher can then log in, go to the usual marking screen and click on
   'Annotate submission', which will bring up the first page of the
@@ -110,8 +119,8 @@ http://sourceforge.net/projects/pdfcreator).
 * Navigate between the pages by clicking on the 'Next' and 'Prev'
   buttons or by pressing 'n' and 'p' on the keyboard.
 
-* Click on 'Save Draft and Close' (or just click on the Window's usual
-  'close' button) to save the work in progress.
+* Click on 'Save Draft and Close' (or just navigate to a different page) to save
+  the work in progress.
 
 * Click on the 'Generate Response' icon to create a new PDF with all your
   annotations present (that the student will be able to access).
@@ -126,10 +135,9 @@ http://sourceforge.net/projects/pdfcreator).
 
 ==Edit Templates==
 
-* Click on the 'Edit Templates...' button on the 'Settings' page
+* Click on the 'Edit Templates...' link on the 'Settings' page
 
-* Choose the name of the Template to edit (or select 'New
-  Template...')
+* Choose the name of the Template to edit (or select 'New Template...')
 
 * You can change the name of the template, delete the template or make
   it available to everyone on the site (administrators only, for this
@@ -160,8 +168,10 @@ http://sourceforge.net/projects/pdfcreator).
   page should have been updated.
 
 ==Known issues==
-
 There is no way to annotate the PDFs without JavaScript.
+Backup & restore will not transfer coversheet templates to a different site
+(it will work fine on a single site). This is a limitation of the assignment
+backup & restore process.
 
 ==Thanks==
 This makes use of GhostScript and the FPDI and TCPDF libraries
