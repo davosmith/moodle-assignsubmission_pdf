@@ -23,10 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version   = 2013010300;
-$plugin->release   = "2.3+ (Build 2013010300)";
+$plugin->version   = 2013013000;
+$plugin->release   = "2.3+ (Build 2013013000)";
 $plugin->requires  = 2012062500;
 $plugin->component = 'assignsubmission_pdf';
-$plugin->maturity  = MATURITY_BETA;
+$plugin->maturity  = MATURITY_STABLE;
 $plugin->cron      = 0;
 $plugin->dependencies = array('assignfeedback_pdf' => 2013010300);

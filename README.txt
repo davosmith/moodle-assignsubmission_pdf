@@ -27,6 +27,7 @@ https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 ==Recent changes==
 
+* 2013-01-30 - Updating to 'stable' as no known issues to fix
 * 2013-01-03 - Fix javascript compatibility with Moodle 2.3
 * 2012-12-31 - Complete rewrite to work with Moodle 2.3+ assign type
 
