@@ -172,6 +172,9 @@ class edit_templates {
                 $datenum = 1;
                 if ($this->itemid == 0) {
                     $this->itemid = reset($items_data)->id;
+                    if ($this->itemid) {
+                        $this->url->param('itemid', $this->itemid);
+                    }
                 }
                 foreach ($items_data as $item) {
                     $selected = '';
