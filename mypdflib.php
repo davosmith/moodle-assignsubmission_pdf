@@ -64,11 +64,7 @@ class AssignPDFLib extends FPDI {
         if ($coversheet) {
             $pagecount = $this->setSourceFile($coversheet);
             $totalpagecount += $pagecount;
-            $template = $this->ImportPage(1);
-            $size = $this->getTemplateSize($template);
-            $this->AddPage('P', array($size['w'], $size['h']));
-            $this->setPageOrientation('P', false, 0);
-            $this->useTemplate($template);
+            $this->create_page_from_source(1);
             if ($fields) {
                 foreach ($fields as $c) {
                     $x = $c->xpos * $this->scale;
@@ -92,22 +88,14 @@ class AssignPDFLib extends FPDI {
             }
 
             for ($i = 2; $i<=$pagecount; $i++) {
-                $template = $this->ImportPage($i);
-                $size = $this->getTemplateSize($template);
-                $this->AddPage('P', array($size['w'], $size['h']));
-                $this->setPageOrientation('P', false, 0);
-                $this->useTemplate($template);
+                $this->create_page_from_source($i);
             }
         }
         foreach ($pdflist as $file) {
             $pagecount = $this->setSourceFile($file);
             $totalpagecount += $pagecount;
             for ($i = 1; $i<=$pagecount; $i++) {
-                $template = $this->ImportPage($i);
-                $size = $this->getTemplateSize($template);
-                $this->AddPage('P', array($size['w'], $size['h']));
-                $this->setPageOrientation('P', false, 0);
-                $this->useTemplate($template);
+                $this->create_page_from_source($i);
             }
         }
 
@@ -183,12 +171,24 @@ class AssignPDFLib extends FPDI {
             return false;
         }
         $this->currentpage++;
-        $template = $this->importPage($this->currentpage);
-        $size = $this->getTemplateSize($template);
-        $this->AddPage('P', array($size['w'], $size['h']));
-        $this->setPageOrientation('P', false, 0);
-        $this->useTemplate($template);
+        $this->create_page_from_source($this->currentpage);
         return true;
+    }
+
+    protected function create_page_from_source($pageno) {
+        // Get the size (and deduce the orientation) of the next page.
+        $template = $this->importPage($pageno);
+        $size = $this->getTemplateSize($template);
+        $orientation = 'P';
+        if ($size['w'] > $size['h']) {
+            $orientation = 'L';
+        }
+        // Create a page of the required size / orientation.
+        $this->AddPage($orientation, array($size['w'], $size['h']));
+        // Prevent new page creation when comments are at the bottom of a page.
+        $this->setPageOrientation($orientation, false, 0);
+        // Fill in the page with the original contents from the student.
+        $this->useTemplate($template);
     }
 
     /**
