@@ -541,9 +541,15 @@ class assign_submission_pdf extends assign_submission_plugin {
         $result = array();
         $fs = get_file_storage();
 
-        /** @var $files stored_file[] */
-        $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
-                                     ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "timemodified", false);
+        if ($submission->status == ASSIGNSUBMISSION_PDF_STATUS_SUBMITTED) {
+            /** @var $files stored_file[] */
+            $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
+                                         ASSIGNSUBMISSION_PDF_FA_FINAL, $submission->id, "timemodified", false);
+        } else {
+            /** @var $files stored_file[] */
+            $files = $fs->get_area_files($this->assignment->get_context()->id, 'assignsubmission_pdf',
+                                         ASSIGNSUBMISSION_PDF_FA_DRAFT, $submission->id, "timemodified", false);
+        }
 
         foreach ($files as $file) {
             $result[$file->get_filename()] = $file;
