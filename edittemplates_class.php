@@ -3,7 +3,7 @@
 require_once(dirname(__FILE__).'/../../../../config.php');
 global $CFG, $DB, $PAGE;
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/mod/assign/submission/pdf/mypdflib.php');
+require_once($CFG->dirroot.'/mod/assign/feedback/pdf/mypdflib.php');
 
 class edit_templates {
 

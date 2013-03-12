@@ -56,9 +56,11 @@ without the submission plugin).
 
 4. Log in to Moodle as administrator, then click on 'Home'.
 
-5. Visit 'Site admin > Plugins > Assignment plugins > Submission Plugins >
+5. Visit 'Site admin > Plugins > Assignment plugins > Feedback Plugins >
   PDF Submission'. Adjust the 'Ghostscript path' to where ghostscript
   is installed (should not need changing on a Linux install).
+  Example paths - Linux / Mac: gs  OR  /usr/bin/gs
+                  Windows: c:\gs\gswin32c.exe
 
 All being well, you should now be able to add submission and feedback
 type 'pdf' to assignments.

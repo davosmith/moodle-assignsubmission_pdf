@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot.'/mod/assign/submission/pdf/lib.php');
-require_once($CFG->dirroot.'/mod/assign/submission/pdf/mypdflib.php');
+require_once($CFG->dirroot.'/mod/assign/feedback/pdf/mypdflib.php');
 
 /*
  * library class for file submission plugin extending submission plugin

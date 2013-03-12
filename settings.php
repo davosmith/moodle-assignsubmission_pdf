@@ -34,10 +34,6 @@ if (isset($CFG->maxbytes)) {
                         get_string('configmaxbytes', 'assignsubmission_file'), 1048576, get_max_upload_sizes($CFG->maxbytes)));
 }
 
-$settings->add(new admin_setting_configtext('assignsubmission_pdf/gspath',
-                                            get_string('gspath', 'assignsubmission_pdf'),
-                                            get_string('gspath2', 'assignsubmission_pdf'), 'gs'));
-
 $maxfiles = array();
 for ($i=1; $i <= ASSIGNSUBMISSION_PDF_MAXFILES; $i++) {
     $maxfiles[$i] = $i;
