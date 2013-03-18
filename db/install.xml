@@ -16,7 +16,7 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="assignment"/>
         <KEY NAME="assignment" TYPE="foreign" FIELDS="assignment" REFTABLE="assign" REFFIELDS="id" PREVIOUS="primary" NEXT="submission"/>
-        <KEY NAME="submission" TYPE="foreign" FIELDS="submission" REFTABLE="assignsubmission" REFFIELDS="id" PREVIOUS="assignment"/>
+        <KEY NAME="submission" TYPE="foreign" FIELDS="submission" REFTABLE="assign_submission" REFFIELDS="id" PREVIOUS="assignment"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="assignsubmission_pdf_tmpl" COMMENT="Stores the data describing a coversheet template" PREVIOUS="assignsubmission_pdf" NEXT="assignsubmission_pdf_tmplit">
