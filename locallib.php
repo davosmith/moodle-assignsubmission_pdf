@@ -56,15 +56,20 @@ class assign_submission_pdf extends assign_submission_plugin {
      */
     public function is_enabled() {
         global $CFG;
-        if (!parent::is_enabled()) {
-            return false;
-        }
 
         static $gspathok = null;
         if (is_null($gspathok)) {
             require_once($CFG->dirroot.'/mod/assign/feedback/pdf/mypdflib.php');
             $result = AssignPDFLib::test_gs_path(false);
             $gspathok = ($result->status == AssignPDFLib::GSPATH_OK);
+            if (!$gspathok && $this->is_visible()) {
+                // gspath is invalid, so the plugin should be globally disabled
+                set_config('disabled', true, $this->get_subtype() . '_' . $this->get_type());
+            }
+        }
+
+        if (!parent::is_enabled()) {
+            return false;
         }
 
         return $gspathok;
