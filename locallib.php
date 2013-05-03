@@ -420,7 +420,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @param stdClass $submission optional details of the submission to process
      * @return void
      */
-    public function submit_for_grading(stdClass $submission = null) {
+    public function submit_for_grading($submission = null) {
         global $DB, $USER;
         if (is_null($submission)) {
             $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
