@@ -102,6 +102,10 @@ type 'pdf' to assignments.
   'Annotate submission', which will bring up the first page of the
   student's work on screen.
 
+* Note that, as with all other feedback types, if you want to be able to access
+  the annotation features directly from the grading overview page you will need
+  to turn on the 'quick grading' feature.
+
 * Click anywhere on the image of the PDF to add a comment. Use the
   resize handle in the bottom-right corner of a comment to resize it,
   click & drag on a comment to move it. Click (without dragging) on a
