@@ -51,31 +51,6 @@ class assign_submission_pdf extends assign_submission_plugin {
     }
 
     /**
-     * Check the ghostscript path is valid to see if the plugin should be enabled.
-     * @return bool
-     */
-    public function is_enabled() {
-        global $CFG;
-
-        static $gspathok = null;
-        if (is_null($gspathok)) {
-            require_once($CFG->dirroot.'/mod/assign/feedback/pdf/mypdflib.php');
-            $result = AssignPDFLib::test_gs_path(false);
-            $gspathok = ($result->status == AssignPDFLib::GSPATH_OK);
-            if (!$gspathok && $this->is_visible()) {
-                // gspath is invalid, so the plugin should be globally disabled
-                set_config('disabled', true, $this->get_subtype() . '_' . $this->get_type());
-            }
-        }
-
-        if (!parent::is_enabled()) {
-            return false;
-        }
-
-        return $gspathok;
-    }
-
-    /**
      * Get file submission information from the database
      *
      * @global moodle_database $DB
@@ -562,7 +537,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @param stdClass $user The user
      * @return array - return an array of files indexed by filename
      */
-    public function get_files(stdClass $submission, stdClass $user) {
+    public function get_files(stdClass $submission) {
         $result = array();
         $fs = get_file_storage();
 
