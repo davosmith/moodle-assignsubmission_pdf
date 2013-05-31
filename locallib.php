@@ -383,14 +383,18 @@ class assign_submission_pdf extends assign_submission_plugin {
     /**
      * If a coversheet template is in use, make sure the student has supplied all
      * the data required.
+     * @param object $submission
      * @return bool|string 'true' if all data supplied, message if some data still needed
      */
     public function precheck_submission($submission = null) {
         global $DB, $USER;
 
         if (is_null($submission)) {
-            $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
-                                                                    'userid' => $USER->id));
+            if (!empty($this->assignment->get_instance()->teamsubmission)) {
+                $submission = $this->assignment->get_group_submission($USER->id, 0, true);
+            } else {
+                $submission = $this->assignment->get_user_submission($USER->id, true);
+            }
         }
         $fs = get_file_storage();
         $context = $this->assignment->get_context();
@@ -428,8 +432,11 @@ class assign_submission_pdf extends assign_submission_plugin {
     public function submit_for_grading($submission = null) {
         global $DB, $USER;
         if (is_null($submission)) {
-            $submission = $DB->get_record('assign_submission', array('assignment' => $this->assignment->get_instance()->id,
-                                                                    'userid' => $USER->id));
+            if (!empty($this->assignment->get_instance()->teamsubmission)) {
+                $submission = $this->assignment->get_group_submission($USER->id, 0, true);
+            } else {
+                $submission = $this->assignment->get_user_submission($USER->id, true);
+            }
         }
         $pagecount = $this->create_submission_pdf($submission);
 

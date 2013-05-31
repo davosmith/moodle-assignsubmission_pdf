@@ -75,15 +75,17 @@ function assignsubmission_pdf_pluginfile($course, $cm, context $context, $filear
             return false; // Submission does not belong to this assignment.
         }
 
-        if ($USER->id == $submission->userid) {
-            // Own submission - check permission to submit.
+        if (!has_capability('mod/assign:grade', $context)) { // Graders can see all files.
             if (!has_capability('mod/assign:submit', $context)) {
-                return false;
+                return false; // Cannot grade or submit => cannot see any files.
             }
-        } else {
-            // Another user's submission - check permission to grade.
-            if (!has_capability('mod/assign:grade', $context)) {
-                return false;
+            // Can submit, but not grade => see if this file belongs to the user or their group.
+            if ($submission->groupid) {
+                if (!groups_is_member($submission->groupid)) {
+                    return false; // Group submission for a group the user doesn't belong to.
+                }
+            } else if ($USER->id != $submission->userid) {
+                return false; // Individual submission for another user.
             }
         }
 
