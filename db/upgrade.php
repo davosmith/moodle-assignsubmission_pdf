@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -37,50 +36,50 @@ function xmldb_assignsubmission_pdf_upgrade($oldversion) {
 
     if ($oldversion < 2012111200) {
 
-        // Add field numpages to table assignsubmission_pdf
+        // Add field numpages to table assignsubmission_pdf.
         $table = new xmldb_table('assignsubmission_pdf');
         $field = new xmldb_field('numpages', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'submission');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // Remove the old numfiles field
+        // Remove the old numfiles field.
         $field = new xmldb_field('numfiles', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'submission');
         if ($dbman->field_exists($table, $field)) {
             $dbman->drop_field($table, $field);
         }
 
-        // pdf savepoint reached
+        // Pdf savepoint reached.
         upgrade_plugin_savepoint(true, 2012111200, 'assignsubmission', 'pdf');
     }
 
     if ($oldversion < 2012111700) {
 
-        // Define field status to be added to assignsubmission_pdf
+        // Define field status to be added to assignsubmission_pdf.
         $table = new xmldb_table('assignsubmission_pdf');
         $field = new xmldb_field('status', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'numpages');
 
-        // Conditionally launch add field status
+        // Conditionally launch add field status.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // pdf savepoint reached
+        // Pdf savepoint reached.
         upgrade_plugin_savepoint(true, 2012111700, 'assignsubmission', 'pdf');
     }
 
     if ($oldversion < 2012122600) {
 
-        // Define field templatedata to be added to assignsubmission_pdf
+        // Define field templatedata to be added to assignsubmission_pdf.
         $table = new xmldb_table('assignsubmission_pdf');
         $field = new xmldb_field('templatedata', XMLDB_TYPE_TEXT, null, null, null, null, null, 'status');
 
-        // Conditionally launch add field templatedata
+        // Conditionally launch add field templatedata.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // pdf savepoint reached
+        // Pdf savepoint reached.
         upgrade_plugin_savepoint(true, 2012122600, 'assignsubmission', 'pdf');
     }
 

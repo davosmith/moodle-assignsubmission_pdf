@@ -42,13 +42,13 @@ class backup_assignsubmission_pdf_subplugin extends backup_subplugin {
      */
     protected function define_submission_subplugin_structure() {
 
-        // create XML elements
-        $subplugin = $this->get_subplugin_element(); // virtual optigroup element
+        // Create XML elements.
+        $subplugin = $this->get_subplugin_element(); // Virtual optigroup element.
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
         $subpluginelement = new backup_nested_element('submission_pdf', null,
                                                       array('numpages', 'submission', 'status', 'templatedata'));
 
-        // Backup comments / annotations here, rather than in the 'feedback' backup
+        // Backup comments / annotations here, rather than in the 'feedback' backup.
         $comments = new backup_nested_element('comments');
         $comment = new backup_nested_element('comment', null,
                                              array('submissionid', 'posx', 'posy', 'width', 'rawtext', 'pageno', 'colour'));
@@ -58,7 +58,7 @@ class backup_assignsubmission_pdf_subplugin extends backup_subplugin {
                                                 array('submissionid', 'pageno', 'startx', 'starty', 'endx', 'endy',
                                                      'path', 'colour', 'type'));
 
-        // connect XML elements into the tree
+        // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginelement);
         $subpluginelement->add_child($comments);
@@ -66,15 +66,15 @@ class backup_assignsubmission_pdf_subplugin extends backup_subplugin {
         $subpluginelement->add_child($annotations);
         $annotations->add_child($annotation);
 
-        // set source to populate the data
+        // Set source to populate the data.
         $subpluginelement->set_source_table('assignsubmission_pdf', array('submission' => backup::VAR_PARENTID));
         $comment->set_source_table('assignfeedback_pdf_cmnt', array('submissionid' => backup::VAR_PARENTID));
         $annotation->set_source_table('assignfeedback_pdf_annot', array('submissionid' => backup::VAR_PARENTID));
 
-        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_draft', 'submission');// The parent is the submission
-        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_final', 'submission');// The parent is the submission
-        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_coversheet', null);// No itemid for the coversheet
-        $subpluginelement->annotate_files('assignfeedback_pdf', 'feedback_pdf_response', 'submission');// The parent is the submission
+        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_draft', 'submission');
+        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_final', 'submission');
+        $subpluginelement->annotate_files('assignsubmission_pdf', 'submission_pdf_coversheet', null);
+        $subpluginelement->annotate_files('assignfeedback_pdf', 'feedback_pdf_response', 'submission');
         return $subplugin;
     }
 }

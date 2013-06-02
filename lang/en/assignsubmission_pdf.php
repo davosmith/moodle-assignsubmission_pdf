@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -33,6 +32,7 @@ $string['choosetemplate'] = 'Choose template';
 $string['clicktosetposition'] = 'Click on the image below to set this position';
 $string['configmaxfiles'] = 'The default value for the \'Maximum number of uploaded PDFs\' setting on the assignment configuration page';
 $string['countfiles'] = '{$a} files';
+$string['courseuploadlimit'] = 'Course upload limit';
 $string['coversheet'] = 'Coversheet to attach';
 $string['coversheet_help'] = 'The coversheet will be automatically added before the combined PDFs that the student submits.';
 $string['coversheetnotice'] = 'The following coversheet will be automatically added to your submission';

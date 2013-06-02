@@ -39,7 +39,7 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         $paths = array();
 
         $elename = $this->get_namefor('submission');
-        $elepath = $this->get_pathfor('/submission_pdf'); // we used get_recommended_name() so this works
+        $elepath = $this->get_pathfor('/submission_pdf'); // We used get_recommended_name() so this works.
         $paths[] = new restore_path_element($elename, $elepath);
 
         $elename = 'assignsubmission_pdf_comment';
@@ -50,7 +50,7 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         $elepath = $this->get_pathfor('/submission_pdf/annotations/annotation');
         $paths[] = new restore_path_element($elename, $elepath);
 
-        return $paths; // And we return the interesting paths
+        return $paths; // And we return the interesting paths.
     }
 
     /**
@@ -64,7 +64,7 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         $data = (object)$data;
         $data->assignment = $this->get_new_parentid('assign');
         $oldsubmissionid = $data->submission;
-        // the mapping is set in the restore for the core assign activity. When a submission node is processed
+        // The mapping is set in the restore for the core assign activity. When a submission node is processed.
         $data->submission = $this->get_mappingid('submission', $data->submission);
 
         $DB->insert_record('assignsubmission_pdf', $data);
@@ -79,7 +79,7 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         global $DB;
 
         $data = (object)$data;
-        // the mapping is set in the restore for the core assign activity. When a submission node is processed
+        // The mapping is set in the restore for the core assign activity. When a submission node is processed.
         $data->submissionid = $this->get_mappingid('submission', $data->submissionid);
 
         $DB->insert_record('assignfeedback_pdf_cmnt', $data);
@@ -89,7 +89,7 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         global $DB;
 
         $data = (object)$data;
-        // the mapping is set in the restore for the core assign activity. When a submission node is processed
+        // The mapping is set in the restore for the core assign activity. When a submission node is processed.
         $data->submissionid = $this->get_mappingid('submission', $data->submissionid);
 
         $DB->insert_record('assignfeedback_pdf_annot', $data);
