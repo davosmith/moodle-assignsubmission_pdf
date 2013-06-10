@@ -759,23 +759,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         );
     }
 
-    protected function get_resubmission_number() {
-        $resub = $this->get_config('resubmission');
-        if ($resub === false) {
-            $resub = 1;
-            $this->set_config('resubmission', $resub);
-        }
-        return $resub;
-    }
-
-    protected function set_resubmission_number($resubmission) {
-        $this->set_config('resubmission', $resubmission);
-    }
-
-    protected function get_subfolder($resubmission = null) {
-        if (is_null($resubmission)) {
-            $resubmission = $this->get_resubmission_number();
-        }
-        return '/'.$resubmission.'/';
+    protected function get_subfolder() {
+        return '/1/';
     }
 }
