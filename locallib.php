@@ -252,7 +252,8 @@ class assign_submission_pdf extends assign_submission_plugin {
 
         file_prepare_standard_filemanager($data, 'pdfs', $fileoptions, $this->assignment->get_context(),
                                           'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_DRAFT, $submissionid);
-        $mform->addElement('filemanager', 'pdfs_filemanager', '', null, $fileoptions);
+        $label = html_writer::tag('span', get_string('pdfsubmissions', 'assignsubmission_pdf'), array('class' => 'accesshide'));
+        $mform->addElement('filemanager', 'pdfs_filemanager', $label, null, $fileoptions);
 
         if ($coversheetfiles) {
             if ($templateid = $this->get_config('templateid')) {

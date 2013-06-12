@@ -70,6 +70,7 @@ $string['newitem'] = 'New item';
 $string['newtemplate'] = 'New template';
 $string['notemplate'] = 'No template';
 $string['pdf'] = 'PDF submission';
+$string['pdfsubmissions'] = 'PDF submissions';
 $string['pluginname'] = 'PDF submission';
 $string['previewinstructions'] = 'Please upload a coversheet (PDF) to help preview this template';
 $string['saveitem'] = 'Save item';
