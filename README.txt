@@ -67,6 +67,11 @@ without the submission plugin).
 All being well, you should now be able to add submission and feedback
 type 'pdf' to assignments.
 
+If you get an 'Unrecoverable error' when attempting to annotate an assignment
+it may well be related to not having ghostscript fonts installed on your
+system. See https://moodle.org/mod/forum/discuss.php?d=218897#p1010615 for
+more details.
+
 ==How to use==
 
 * Add a new Assignment to a course.
