@@ -27,6 +27,7 @@ https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 ==Recent changes==
 
+* 2013-08-07 - Fix compatibility issue introduced by MDL-39760
 * 2013-03-25 - Plugin is disabled if the ghostscipt path is incorrect
 * 2013-02-22 - Now correctly handles 'landscape' pages in PDFs
 * 2013-01-30 - Updating to 'stable' as no known issues to fix
