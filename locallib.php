@@ -636,12 +636,14 @@ class assign_submission_pdf extends assign_submission_plugin {
                                                                 $submission->id);
             }
         } else {
-            $context = $this->assignment->get_context();
-            $url = moodle_url::make_pluginfile_url($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_FINAL,
-                                                   $submission->id, $this->get_subfolder(), ASSIGNSUBMISSION_PDF_FILENAME,
-                                                   true);
-            $output .= $OUTPUT->pix_icon('t/download', '');
-            $output .= html_writer::link($url, get_string('finalsubmission', 'assignsubmission_pdf'));
+            if (!$this->is_empty($submission)) {
+                $context = $this->assignment->get_context();
+                $url = moodle_url::make_pluginfile_url($context->id, 'assignsubmission_pdf', ASSIGNSUBMISSION_PDF_FA_FINAL,
+                                                       $submission->id, $this->get_subfolder(), ASSIGNSUBMISSION_PDF_FILENAME,
+                                                       true);
+                $output .= $OUTPUT->pix_icon('t/download', '');
+                $output .= html_writer::link($url, get_string('finalsubmission', 'assignsubmission_pdf'));
+            }
         }
 
         return $output;
