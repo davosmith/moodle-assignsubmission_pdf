@@ -140,7 +140,7 @@ class assign_submission_pdf extends assign_submission_plugin {
         $mform->addElement('filemanager', 'assignsubmission_pdf_coversheet', get_string('coversheet', 'assignsubmission_pdf'), null,
                            array(
                                 'subdirs' => 0, 'maxbytes' => $COURSE->maxbytes,
-                                'maxfiles' => 1, 'accepted_types' => array('*.pdf')
+                                'maxfiles' => 1, 'accepted_types' => array('.pdf')
                            ));
 
         // Templates.
