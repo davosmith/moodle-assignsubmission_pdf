@@ -27,6 +27,7 @@ https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 ==Recent changes==
 
+* 2013-10-31 - Now able to create new submission from previous submission.
 * 2013-09-29 - Hide 'Download final submission' link when no files submitted.
 * 2013-05-31 - Fix support for team submissions
 * 2013-03-25 - Plugin is disabled if the ghostscipt path is incorrect
