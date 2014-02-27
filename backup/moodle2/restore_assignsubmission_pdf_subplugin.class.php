@@ -43,11 +43,11 @@ class restore_assignsubmission_pdf_subplugin extends restore_subplugin {
         $paths[] = new restore_path_element($elename, $elepath);
 
         $elename = 'assignsubmission_pdf_comment';
-        $elepath = $this->get_pathfor('/submission_pdf/comments/comment');
+        $elepath = $this->get_pathfor('/submission_pdf/pdfcomments/pdfcomment');
         $paths[] = new restore_path_element($elename, $elepath);
 
         $elename = 'assignsubmission_pdf_annotation';
-        $elepath = $this->get_pathfor('/submission_pdf/annotations/annotation');
+        $elepath = $this->get_pathfor('/submission_pdf/pdfannotations/pdfannotation');
         $paths[] = new restore_path_element($elename, $elepath);
 
         return $paths; // And we return the interesting paths.

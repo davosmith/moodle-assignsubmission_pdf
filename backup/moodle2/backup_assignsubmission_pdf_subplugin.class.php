@@ -49,12 +49,12 @@ class backup_assignsubmission_pdf_subplugin extends backup_subplugin {
                                                       array('numpages', 'submission', 'status', 'templatedata'));
 
         // Backup comments / annotations here, rather than in the 'feedback' backup.
-        $comments = new backup_nested_element('comments');
-        $comment = new backup_nested_element('comment', null,
+        $comments = new backup_nested_element('pdfcomments');
+        $comment = new backup_nested_element('pdfcomment', null,
                                              array('submissionid', 'posx', 'posy', 'width', 'rawtext', 'pageno', 'colour'));
 
-        $annotations = new backup_nested_element('annotations');
-        $annotation = new backup_nested_element('annotation', null,
+        $annotations = new backup_nested_element('pdfannotations');
+        $annotation = new backup_nested_element('pdfannotation', null,
                                                 array('submissionid', 'pageno', 'startx', 'starty', 'endx', 'endy',
                                                      'path', 'colour', 'type'));
 

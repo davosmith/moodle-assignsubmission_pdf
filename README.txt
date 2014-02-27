@@ -27,6 +27,9 @@ https://github.com/davosmith/moodle-assignfeedback_pdf/zipball/master
 
 ==Recent changes==
 
+* 2014-02-27 - Backup structure changed to avoid clashes with built-in type in Moodle 2.6.
+               IMPORTANT! Annotations / comments previously backed up CANNOT be restored
+               after this version has been installed.
 * 2013-10-31 - Now able to create new submission from previous submission.
 * 2013-09-29 - Hide 'Download final submission' link when no files submitted.
 * 2013-05-31 - Fix support for team submissions
