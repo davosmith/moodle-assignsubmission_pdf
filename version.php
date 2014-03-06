@@ -23,8 +23,8 @@
  */
 
 $plugin->version   = 2014022700;
-$plugin->release   = "2.5+ (Build 2013103100)";
-$plugin->requires  = 2014022700;
+$plugin->release   = "2.5+ (Build 2014022700)";
+$plugin->requires  = 2013051400;
 $plugin->component = 'assignsubmission_pdf';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron      = 0;
