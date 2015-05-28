@@ -311,7 +311,7 @@ class assign_submission_pdf extends assign_submission_plugin {
      * @return bool
      */
     public function save(stdClass $submission, stdClass $data) {
-        global $USER, $DB, $SESSION;
+        global $USER, $DB, $SESSION, $CFG;
 
         // Pre-process all files to convert to useful PDF format.
         $fileoptions = $this->get_file_options();
@@ -353,18 +353,36 @@ class assign_submission_pdf extends assign_submission_plugin {
         $count = $this->count_files($submission->id, ASSIGNSUBMISSION_PDF_FA_DRAFT);
         // Send files to event system.
         // Let Moodle know that an assessable file was uploaded (eg for plagiarism detection).
-        $eventdata = new stdClass();
-        $eventdata->modulename = 'assign';
-        $eventdata->cmid = $this->assignment->get_course_module()->id;
-        $eventdata->itemid = $submission->id;
-        $eventdata->courseid = $this->assignment->get_course()->id;
-        $eventdata->userid = $USER->id;
-        if ($count>1) {
-            $eventdata->files = $files; // This is depreceated - please use pathnamehashes instead!
+        if ($CFG->branch < 26) {
+            $eventdata = new stdClass();
+            $eventdata->modulename = 'assign';
+            $eventdata->cmid = $this->assignment->get_course_module()->id;
+            $eventdata->itemid = $submission->id;
+            $eventdata->courseid = $this->assignment->get_course()->id;
+            $eventdata->userid = $USER->id;
+            if ($count > 1) {
+                $eventdata->files = $files; // This is depreceated - please use pathnamehashes instead!
+            }
+            $eventdata->file = $files; // This is depreceated - please use pathnamehashes instead!
+            $eventdata->pathnamehashes = array_keys($files);
+            events_trigger('assessable_file_uploaded', $eventdata);
+        } else {
+            $params = array(
+                'context' => context_module::instance($this->assignment->get_course_module()->id),
+                'courseid' => $this->assignment->get_course()->id,
+                'objectid' => $submission->id,
+                'other' => array(
+                    'content' => '',
+                    'pathnamehashes' => array_keys($files)
+                )
+            );
+            if (!empty($submission->userid) && ($submission->userid != $USER->id)) {
+                $params['relateduserid'] = $submission->userid;
+            }
+            $event = \assignsubmission_file\event\assessable_uploaded::create($params);
+            $event->set_legacy_files($files);
+            $event->trigger();
         }
-        $eventdata->file = $files; // This is depreceated - please use pathnamehashes instead!
-        $eventdata->pathnamehashes = array_keys($files);
-        events_trigger('assessable_file_uploaded', $eventdata);
 
         if ($pdfsubmission) {
             $pdfsubmission->numpages = 0;
